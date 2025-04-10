@@ -6,33 +6,23 @@
 // MIN CHILD = MINIMUM_DEGREE
 // MAX CHILD = 2 * MINIMUM DEGREE
 
-typedef struct btree_node{
-  bool leaf; // IS this a leaf
-  int *keys; // Array of keys
-  int nb_keys; // nb of keys
-  struct btree_node **Children; // Array of child pointers, each valye of tgus array points to a child
-} btree_node;
+/*
+bool leaf -> Is the current node a leaf
+int *keys -> Array of the keys inside the node [key1, key2, key3]
+int nkeys -> Counter of the number of keys inside the node so increases until it is at Max keys (But implement it)
+struct btree_node **Children -> This will store the Children nodes,
+  - We use struct btree_node because we are working with node, so the "return value" is a struct_node
+   - **Children, It is a pointer to an array of btree_node, i can also write it as *Children[]
+   The first * point to the FIRST value of the array of btree_node
+   the Second * points to the FIRST struct btree_node, not the memory adress but the actual value, Meaning  i deference the address
+*/
 
-
-
-btree_node* createNode(bool leaf);
-
-// Define Rows in the table
-// typedef struct Rows {
-//   int id;
-//   char username[50];
-//   char password[50];
-//   char ip_address[7];  
-// } Rows;
-
-// Define Tables / db
-// I think inside this will be the btrees (So for ID Username Password)
-// typedef struct Tables {
-//   Rows row;
-// } Tables;
-
-
-
+// typedef struct btree_node{
+//   bool leaf; // IS this a leaf
+//   int *keys; // Array of keys
+//   int nb_keys; // nb of keys
+//   struct btree_node **Children; // Array of child pointers, each valye of tgus array points to a child
+// } btree_node;
 
 
 
