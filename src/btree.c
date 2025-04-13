@@ -45,15 +45,27 @@ struct btree *createBtree(){ // This function has to be a pointer because we wil
 
 
 
+void SearchKey(btree_node *node, int key){
+  int i = 0;
+  while (i < node->nb_keys &&  key > node->keys[i]) {
+    i++;
+  }
+  if ( i < node->nb_keys && node->keys[i] == key) {
+    printf("Found the key good!\n");
+  } else if (node->leaf == true) {
+    printf("Did not found the correct key in the tree");
+  } else {
+    SearchKey(node->Children[i], key);
+  }
+}
+
 
 void insertSplitChild(btree_node *parent, int index){
   btree_node *oldroot = parent->Children[index];
   int median_index = oldroot->nb_keys / 2;
-
 // Create the new child node and assign the correct leaf value
   btree_node *NewNode = create_newNode();
   NewNode->leaf = oldroot-> leaf;
-
   int tmp = 0;
 // Assign right value of old root to new child (right)
   for (int j = median_index + 1; j < oldroot->nb_keys; j++) {
@@ -108,10 +120,6 @@ void insertNonFullKey(btree_node *node, int key){
       }
     }
     insertNonFullKey(node->Children[i], key);
-
-
-    
-
   }    
 }
 
@@ -126,9 +134,7 @@ void insertKey(int key, btree *tree){
     insertSplitChild(NewRoot, 0);
     // Update the bew tree root
     tree->root = NewRoot;
-    insertNonFullKey(NewRoot, key);
-
-    
+    insertNonFullKey(NewRoot, key);    
   } 
   // Case where root is not full
   else {
@@ -141,7 +147,6 @@ void insertKey(int key, btree *tree){
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value
 
 void free_Node(btree_node *node){
-
   if (node->leaf == false) {
     for (int i = 0; i <= node->nb_keys; i++) { // Recursively go the the leaf and delete everything, working checked on ps aux
       free_Node(node->Children[i]);
@@ -167,12 +172,15 @@ int main(){
   insertKey(15, mytree);
   insertKey(12, mytree);
   insertKey(456, mytree);
-  printf("%d\n", mytree->root->keys[0]);
-  printf("%d\n", mytree->root->Children[0]->keys[0]);
-  printf("%d\n", mytree->root->Children[1]->keys[0]);
-  printf("%d\n", mytree->root->Children[1]->keys[1]);
+  // printf("%d\n", mytree->root->keys[0]);
+  // printf("%d\n", mytree->root->Children[0]->keys[0]);
+  // printf("%d\n", mytree->root->Children[1]->keys[0]);
+  // printf("%d\n", mytree->root->Children[1]->keys[1]);
   // printf("%d\n", mytree->root->keys[2]);
   // printf("Root node keys are : %d", )
+  SearchKey(mytree->root, 12);
+  SearchKey(mytree->root, 17);
+  SearchKey(mytree->root, 456);
   free_Tree(mytree);
 
   
