@@ -7,7 +7,7 @@
 
 int main(int argc, char* argv[], char* envp[]){
 	printf("Welcome to this database !\n Check the README before using ! \n");
-	
+	run_all_tests();
 
 	
 	// char choice[1];

@@ -99,16 +99,20 @@ void insertNonFullKey(btree_node *node, int key){
     }
     i++;
     // Maybe rror here odl
-    if (node->Children[i]->nb_keys == MAX_KEY) {
-      insertSplitChild(node, i);
-      // Now i have two child but i have to choose in which child i do insert
-      if (node->keys[i] > key) {
-        i++;
+
+      if (node->Children[i]->nb_keys == MAX_KEY) {
+          insertSplitChild(node, i);
+
+          if (key > node->keys[i]) {
+              i++;
+          }
       }
-    }
-    insertNonFullKey(node->Children[i], key);
+
+      insertNonFullKey(node->Children[i], key);
+
+        }
   }    
-}
+
 
 
 void insertKey(int key, btree *tree){
@@ -246,6 +250,22 @@ void deleteKey(int key, btree_node* node){
 
     
   }
+
+
+
+void traverseTree(btree_node *node) {
+    int i;
+    for (i = 0; i < node->nb_keys; i++) {
+        if (!node->leaf) {
+            traverseTree(node->Children[i]);
+        }
+        printf("%d - \n", node->keys[i]);
+    }
+    if (!node->leaf) {
+        traverseTree(node->Children[i]); // Last child
+    }
+}
+
 
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value
 

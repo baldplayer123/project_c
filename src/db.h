@@ -5,7 +5,10 @@
 #define ORDER_TREE 4
 #define MAX_KEY (ORDER_TREE - 1)
 #define MIN_KEY ((ORDER_TREE /2) - 1)
- 
+
+  // Btree
+  // ---------------------
+
 typedef struct btree_node{
   bool leaf; // IS this a leaf
   int *keys; // Array of keys
@@ -34,16 +37,28 @@ void deleteFromNonLeaf(btree_node* node, int index);
 
 // Search
 void SearchKey(btree_node *node, int key);
+void traverseTree(btree_node *node);
 
 // Utilities
 int UTILS_getPred(btree_node *node);
 int UTILS_GetSuc(btree_node *node);
 void UTILS_merge(btree_node *node, int index);
-
+  
 // Cleanup
 void free_Node(btree_node *node);
 void free_Tree(btree *tree);
 
+
+  // Tests
+  // ---------------------
+
+// Btree tests
+void btree_test_Insert100values();
+void btree_test_InsertAndDelete();
+int btree_test_traversalreturn(btree_node *node, int *lastvalue);
+
+
+void run_all_tests();
 
 
 #endif
