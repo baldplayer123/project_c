@@ -42,85 +42,101 @@ struct btree *createBtree(){ // This function has to be a pointer because we wil
   return tree; // Return the tree pointer 
 }
 
+
+
+
+
+void insertSplitChild(btree_node *parent, int index){
+  btree_node *oldroot = parent->Children[index];
+  int median_index = oldroot->nb_keys / 2;
+
+// Create the new child node and assign the correct leaf value
+  btree_node *NewNode = create_newNode();
+  NewNode->leaf = oldroot-> leaf;
+
+  int tmp = 0;
+// Assign right value of old root to new child (right)
+  for (int j = median_index + 1; j < oldroot->nb_keys; j++) {
+      NewNode->keys[tmp] = oldroot->keys[j];
+      NewNode->nb_keys += 1;
+  }
+// If oldroot is not a leaf, copy children as well
+// What happens here is t hat we copy all the Children of old root bigger than
+// oldroot median+1 index to the new right node
+  tmp = 0;
+  if (!oldroot->leaf) {
+    for (int j = median_index + 1; j <= oldroot->nb_keys; j++) {
+        NewNode->Children[tmp] = oldroot->Children[j];
+        tmp++;
+    }
+}
+// Make space for inserting the children to new root node
+  for (int j = parent->nb_keys; j > index; j--) {
+    parent->keys[j] = parent->keys[j-1];
+    parent->Children[j+1] = parent->Children[j];
+  }
+  parent->keys[index] = oldroot->keys[median_index];
+  oldroot->nb_keys = median_index;
+  parent->nb_keys += 1;
+  parent->Children[index + 1] = NewNode;
+}
+
+
 void insertNonFullKey(btree_node *node, int key){
   int i = node->nb_keys - 1;
-  while (i >= 0 && node->keys[i] > key) {
-    i--;
+  if (node->leaf == true){
+    // Leaf donc insert directement  Easy
+    while (i >= 0 && key < node->keys[i]) {
+      node->keys[i + 1] = node->keys[i];
+      i--;
+    }
+    i++;
+    node->keys[i] = key;
+    node->nb_keys += 1;
   }
-  i++; // NEW POSITION IN THE ARRAY
-  for (int j = node->nb_keys - 1; j >= i; j--) {
-    node->keys[j+1] = node->keys[j];
-  }
-  node->keys[i] = key;
-  node->nb_keys += 1;
+  else {
+    // Node n'est pas une feuille donc split child and insert
+    while (i >= 0 && key < node->keys[i] ) {
+      i--;
+    }
+    i++;
+    if (node->Children[i]->nb_keys == max_size_keys) {
+      insertSplitChild(node->Children[i], i);
+      // Now i have two child but i have to choose in which child i do insert
+      if (node->keys[i] > key) {
+        i++;
+      }
+    }
+    insertNonFullKey(node->Children[i], key);
+
+
+    
+
+  }    
 }
- 
 
-  
-
-
-void insertFullKey(){
-  
-}
-
-void insertSplitChild(btree_node *node, btree_node *NewNode){
-  int check_median = node->nb_keys / 2; // This will be the median value!
-  NewNode->keys[0] = node->keys[check_median]; // Append to the new root the median value
-  NewNode->nb_keys += 1;
-
-  btree_node *NewChild = create_newNode();
-  NewChild->leaf = true;
-
-// This put all the values that comes before the median to the left child
-  for (int i = 0; i < check_median; i++) { 
-    NewChild->keys[i] = node->keys[i];
-    NewChild->nb_keys += 1;
-  }
-// This will reset the array of current node (root) and put the new good value inside it
-  int tmp_count = 0;
-  for (int i = check_median + 1; i < node->nb_keys; i++) {
-    node->keys[tmp_count] = node->keys[i];
-    tmp_count += 1;
-  }
-  node->nb_keys = tmp_count;  
-// Now i have to append the new memory address in the children array
-  NewNode->Children[0] = NewChild;
-  NewNode->Children[1] = node;
-}
 
 void insertKey(int key, btree *tree){
   btree_node *root = tree->root;
-  // Case where root if full, so create new root and do the split child
+  // Case where root is ful!!!
   if (root->nb_keys == max_size_keys) {
-    btree_node *NewNode = create_newNode();
-    NewNode->leaf = false;
-    insertSplitChild(root, NewNode);
-  }
-  else if (root->nb_keys < 3){
-    if (root->nb_keys == 0){
-      root->keys[0] = key;
-      root->nb_keys += 1;
-    }
-    else {
+    btree_node *NewRoot = create_newNode();
+    NewRoot->leaf = false;
+    NewRoot->Children[0] = root;
+    insertSplitChild(NewRoot, 0);
+    // Update the bew tree root
+    tree->root = NewRoot;
+    insertNonFullKey(NewRoot, key);
+
+    
+  } 
+  // Case where root is not full
+  else {
     insertNonFullKey(root, key);
-    }
   }
-  // printf("number is %d\n", root->nb_keys);
-  // printf("number key is %d\n", key);
-
-  if (root->nb_keys == 3) { // Case where root is full
-  
-  }
-  //  else {
-  //   printf("Check if else was done\n");
-  // }
-
-
-  
 }
   
 
-  
 
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value
 
@@ -138,7 +154,7 @@ void free_Node(btree_node *node){
 
 void free_Tree(btree *tree){
   btree_node *root = tree->root;
-  free_Node(root);
+  free(tree);
 }
 
 
@@ -151,8 +167,10 @@ int main(){
   insertKey(15, mytree);
   insertKey(12, mytree);
   insertKey(456, mytree);
-  // printf("%d\n", mytree->root->keys[0]);
-  // printf("%d\n", mytree->root->keys[1]);
+  printf("%d\n", mytree->root->keys[0]);
+  printf("%d\n", mytree->root->Children[0]->keys[0]);
+  printf("%d\n", mytree->root->Children[1]->keys[0]);
+  printf("%d\n", mytree->root->Children[1]->keys[1]);
   // printf("%d\n", mytree->root->keys[2]);
   // printf("Root node keys are : %d", )
   free_Tree(mytree);
@@ -160,3 +178,4 @@ int main(){
   
   
 } 
+
