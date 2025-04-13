@@ -1,26 +1,10 @@
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 // #include <string.h>
 #include <stdbool.h>
-// #include "db.h"
-
-
-#define ORDER_TREE 4
-#define MAX_KEY (ORDER_TREE - 1)
-#define MIN_KEY ((ORDER_TREE /2) - 1)
- 
-typedef struct btree_node{
-  bool leaf; // IS this a leaf
-  int *keys; // Array of keys
-  int nb_keys; // nb of keys
-  struct btree_node **Children; // Array of child pointers, each valye of tgus array points to a child
-} btree_node;
-
-typedef struct btree{
-  struct btree_node *root;
-} btree;
-
+#include "db.h"
 
 
 
@@ -42,7 +26,6 @@ struct btree *createBtree(){ // This function has to be a pointer because we wil
   tree->root->leaf = true;
   return tree; // Return the tree pointer 
 }
-
 
 
 
@@ -146,6 +129,66 @@ void insertKey(int key, btree *tree){
   }
 }
   
+// This return index of biggedst value
+int UTILS_getPred(btree_node *node){
+  btree_node *tmp = node;
+  while (!tmp->leaf) {
+    tmp = tmp->Children[tmp->nb_keys - 1]; // Recursive into the child node with the highest value of key and append to tmp that node
+  }
+  return tmp->keys[tmp->nb_keys - 1];
+}
+
+
+// This return index of biggedt  value
+int UTILS_GetSuc(btree_node *node){
+  btree_node *tmp = node;
+  while (!tmp->leaf) {
+    tmp = tmp->Children[0]; // Recursive into the child node with the highest value of key and append to tmp that node
+  }
+  return tmp->keys[0];
+}
+
+
+// This return pointer to node!
+
+void UTILS_merge(btree_node *parent, int index) {
+  btree_node *left = parent->Children[index];
+  btree_node *right = parent->Children[index + 1];
+
+  int original_nb_keys = left->nb_keys;  
+    // Move parent key down into left
+
+  left->keys[original_nb_keys] = parent->keys[index]; 
+    // Copy right child's keys into left
+
+  for (int i = 0; i < right->nb_keys; i++) {
+      left->keys[original_nb_keys + 1 + i] = right->keys[i];  // offset by +1
+  }
+
+    // If not leaf, copy right child's children too
+
+  if (!left->leaf) {
+      for (int i = 0; i <= right->nb_keys; i++) {
+          left->Children[left->nb_keys + i] = right->Children[i];
+      }
+  }
+
+
+    left->nb_keys = original_nb_keys + 1 + right->nb_keys;
+    // Shift parent keys and children to fill the gap
+    for (int i = index; i < parent->nb_keys - 1; i++) {
+        parent->keys[i] = parent->keys[i + 1];
+        parent->Children[i + 1] = parent->Children[i + 2];
+    }
+
+    parent->nb_keys--;
+
+    // Free the right node
+    free(right->keys);
+    free(right->Children);
+    free(right);
+}
+
 
 void deleteFromLeaf(btree_node *node, int index){
     for (int j = index; j < node->nb_keys; j++) {
@@ -155,38 +198,54 @@ void deleteFromLeaf(btree_node *node, int index){
 }
 
 
-void deleteFromNonLeaf(btree_node* node, int index);
+void deleteFromNonLeaf(btree_node* node, int index){
+  if (node->Children[index]->nb_keys > MIN_KEY) { // So if predecessor child has at least MIN KEY INSIDE
+    int pred = UTILS_getPred(node->Children[index]);
+    node->keys[index] = pred;
+    deleteKey(pred, node->Children[index]);
+  }
+  else if (node->Children[index+1]->nb_keys > MIN_KEY) { // if successor child has at least MIN KEY INSIDE
+    int suc = UTILS_GetSuc(node->Children[index+1]);
+    node->keys[index] = suc;
+    deleteKey(suc, node->Children[index+1]);
+  }
+  else { // If both node children are equals to MIN KEY
+    UTILS_merge(node, index);
+    deleteKey(node->keys[index], node->Children[index]); 
+  }
+}
+
 
 void deleteKey(int key, btree_node* node){
+  // Look for correct place of insertion for node
   int i = 0;
   while (i < node->nb_keys && key > node->keys[i]) {
       i++;
   }
-
   if (i < node->nb_keys && node->keys[i] == key) {
+// Dont forget to check if min key is respected
+    
+  // Case 1 -> If the node is a leaf, just delete nothing else to check (Maybe delete the node if node has only one key)
     if (node->leaf) {
       deleteFromLeaf(node, i);
     }
+  // Case 2 -> The node is not leaf so internal!
     else {
-      printf("Delete from non leaf not yet!\n");
+      deleteFromNonLeaf(node, i);
     }
   }
-  else { // Case key not found
-    if (node->leaf == true) {
-      printf("Key not found !");
+  // Go down a node to find the correct key
+  else if ( i < node->nb_keys && !node->leaf) { // Case key not found
+      deleteKey(key, node->Children[i]);
     }
+  // did not find anything
+  else {
+    printf("Key not found!!!\n");
+  }
     
 
     
   }
-    
-  
-  }
-
-
-
-
-
 
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value
 
@@ -207,35 +266,35 @@ void free_Tree(btree *tree){
 }
 
 
-int main(){
-  printf("Program begins \n");
-  struct btree *mytree = createBtree(); // Address of my tree in the heap
-  printf("%p\n", mytree->root);
-  // printf("%d\n", mytree->root->leaf);
-  insertKey(35, mytree);
-  insertKey(15, mytree);
-  insertKey(12, mytree);
-  // insertKey(456, mytree);
-  // printf("%d\n", mytree->root->keys[0]);
-  // printf("%d\n", mytree->root->Children[0]->keys[0]);
-  // printf("%d\n", mytree->root->Children[1]->keys[0]);
-  // printf("%d\n", mytree->root->Children[1]->keys[1]);
-  // printf("%d\n", mytree->root->keys[2]);
-  // printf("Root node keys are : %d", )
-  // SearchKey(mytree->root, 12);
-  // SearchKey(mytree->root, 17);
-  // SearchKey(mytree->root, 456);
-  deleteKey(12, mytree->root);
-  printf("%d\n", mytree->root->keys[0]);
-  printf("%d\n", mytree->root->keys[1]);
-  printf("%d\n", mytree->root->keys[2]);
-  // printf("%d\n", mytree->root->Children[0]->keys[0]);
-  // printf("%d\n", mytree->root->Children[1]->keys[0]);
-  // printf("%d\n", mytree->root->Children[1]->keys[1]);
+// int main(){
+//   printf("Program begins \n");
+//   struct btree *mytree = createBtree(); // Address of my tree in the heap
+//   printf("%p\n", mytree->root);
+//   // printf("%d\n", mytree->root->leaf);
+//   insertKey(35, mytree);
+//   insertKey(15, mytree);
+//   insertKey(12, mytree);
+//   // insertKey(456, mytree);
+//   // printf("%d\n", mytree->root->keys[0]);
+//   // printf("%d\n", mytree->root->Children[0]->keys[0]);
+//   // printf("%d\n", mytree->root->Children[1]->keys[0]);
+//   // printf("%d\n", mytree->root->Children[1]->keys[1]);
+//   // printf("%d\n", mytree->root->keys[2]);
+//   // printf("Root node keys are : %d", )
+//   // SearchKey(mytree->root, 12);
+//   // SearchKey(mytree->root, 17);
+//   // SearchKey(mytree->root, 456);
+//   deleteKey(12, mytree->root);
+//   printf("%d\n", mytree->root->keys[0]);
+//   printf("%d\n", mytree->root->keys[1]);
+//   printf("%d\n", mytree->root->keys[2]);
+//   // printf("%d\n", mytree->root->Children[0]->keys[0]);
+//   // printf("%d\n", mytree->root->Children[1]->keys[0]);
+//   // printf("%d\n", mytree->root->Children[1]->keys[1]);
   
-  free_Tree(mytree);
+//   free_Tree(mytree);
 
   
   
-} 
+// } 
 

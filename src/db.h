@@ -1,30 +1,48 @@
 #ifndef DB_H
 #define DB_H
+#include <stdbool.h>
 
-#define MINIMUM_DEGREE 2
-// MAX KEYS = 2 * MINIMUM_DEGREE - 1
-// MIN CHILD = MINIMUM_DEGREE
-// MAX CHILD = 2 * MINIMUM DEGREE
+#define ORDER_TREE 4
+#define MAX_KEY (ORDER_TREE - 1)
+#define MIN_KEY ((ORDER_TREE /2) - 1)
+ 
+typedef struct btree_node{
+  bool leaf; // IS this a leaf
+  int *keys; // Array of keys
+  int nb_keys; // nb of keys
+  struct btree_node **Children; // Array of child pointers, each valye of tgus array points to a child
+} btree_node;
 
-/*
-bool leaf -> Is the current node a leaf
-int *keys -> Array of the keys inside the node [key1, key2, key3]
-int nkeys -> Counter of the number of keys inside the node so increases until it is at Max keys (But implement it)
-struct btree_node **Children -> This will store the Children nodes,
-  - We use struct btree_node because we are working with node, so the "return value" is a struct_node
-   - **Children, It is a pointer to an array of btree_node, i can also write it as *Children[]
-   The first * point to the FIRST value of the array of btree_node
-   the Second * points to the FIRST struct btree_node, not the memory adress but the actual value, Meaning  i deference the address
-*/
-
-// typedef struct btree_node{
-//   bool leaf; // IS this a leaf
-//   int *keys; // Array of keys
-//   int nb_keys; // nb of keys
-//   struct btree_node **Children; // Array of child pointers, each valye of tgus array points to a child
-// } btree_node;
+typedef struct btree{
+  struct btree_node *root;
+} btree;
 
 
+// Creation & Initialization
+btree_node *create_newNode(void);
+btree *createBtree(void);
+
+// Insertion
+void insertKey(int key, btree *tree);
+void insertNonFullKey(btree_node *node, int key);
+void insertSplitChild(btree_node *parent, int index);
+
+// Deletion
+void deleteKey(int key, btree_node* node);
+void deleteFromLeaf(btree_node *node, int index);
+void deleteFromNonLeaf(btree_node* node, int index);
+
+// Search
+void SearchKey(btree_node *node, int key);
+
+// Utilities
+int UTILS_getPred(btree_node *node);
+int UTILS_GetSuc(btree_node *node);
+void UTILS_merge(btree_node *node, int index);
+
+// Cleanup
+void free_Node(btree_node *node);
+void free_Tree(btree *tree);
 
 
 
