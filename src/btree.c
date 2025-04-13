@@ -5,10 +5,11 @@
 #include <stdbool.h>
 // #include "db.h"
 
-int max_size_keys = 3;
 
-
-
+#define ORDER_TREE 4
+#define MAX_KEY (ORDER_TREE - 1)
+#define MIN_KEY ((ORDER_TREE /2) - 1)
+ 
 typedef struct btree_node{
   bool leaf; // IS this a leaf
   int *keys; // Array of keys
@@ -28,9 +29,9 @@ typedef struct btree{
 // Be carefull if i return only NewNode and not *NewNode, i will copy the value on the stack and lose the address in the heap
 struct btree_node *create_newNode(){
   struct btree_node *NewNode = malloc(sizeof(btree_node)); // If i dont initialise it as a pointer, it will be stored on the stacj and not the heap so no dynamic memory -> will lead to stack overflow with a lot of node
-  NewNode->keys = malloc(sizeof(int) * max_size_keys);
+  NewNode->keys = malloc(sizeof(int) * MAX_KEY);
   NewNode->nb_keys = 0;
-  NewNode->Children = malloc(sizeof(btree_node*) * 4); // *4 because max 4 children // Children étant tableau de pointer on alloue sizeof(*btreenode)
+  NewNode->Children = malloc(sizeof(btree_node*) * ORDER_TREE); // *4 because max 4 children // Children étant tableau de pointer on alloue sizeof(*btreenode)
   return NewNode; // Do not return the pointer to newNode because it will copy the struct on the stack and lose memory reference to the right value on the stack
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value
 }
@@ -70,7 +71,9 @@ void insertSplitChild(btree_node *parent, int index){
 // Assign right value of old root to new child (right)
   for (int j = median_index + 1; j < oldroot->nb_keys; j++) {
       NewNode->keys[tmp] = oldroot->keys[j];
+      tmp++;
       NewNode->nb_keys += 1;
+      
   }
 // If oldroot is not a leaf, copy children as well
 // What happens here is t hat we copy all the Children of old root bigger than
@@ -112,8 +115,9 @@ void insertNonFullKey(btree_node *node, int key){
       i--;
     }
     i++;
-    if (node->Children[i]->nb_keys == max_size_keys) {
-      insertSplitChild(node->Children[i], i);
+    // Maybe rror here odl
+    if (node->Children[i]->nb_keys == MAX_KEY) {
+      insertSplitChild(node, i);
       // Now i have two child but i have to choose in which child i do insert
       if (node->keys[i] > key) {
         i++;
@@ -127,7 +131,7 @@ void insertNonFullKey(btree_node *node, int key){
 void insertKey(int key, btree *tree){
   btree_node *root = tree->root;
   // Case where root is ful!!!
-  if (root->nb_keys == max_size_keys) {
+  if (root->nb_keys == MAX_KEY) {
     btree_node *NewRoot = create_newNode();
     NewRoot->leaf = false;
     NewRoot->Children[0] = root;
@@ -142,6 +146,46 @@ void insertKey(int key, btree *tree){
   }
 }
   
+
+void deleteFromLeaf(btree_node *node, int index){
+    for (int j = index; j < node->nb_keys; j++) {
+    node->keys[j] = node->keys[j+1];
+    }
+    node->nb_keys--;  
+}
+
+
+void deleteFromNonLeaf(btree_node* node, int index);
+
+void deleteKey(int key, btree_node* node){
+  int i = 0;
+  while (i < node->nb_keys && key > node->keys[i]) {
+      i++;
+  }
+
+  if (i < node->nb_keys && node->keys[i] == key) {
+    if (node->leaf) {
+      deleteFromLeaf(node, i);
+    }
+    else {
+      printf("Delete from non leaf not yet!\n");
+    }
+  }
+  else { // Case key not found
+    if (node->leaf == true) {
+      printf("Key not found !");
+    }
+    
+
+    
+  }
+    
+  
+  }
+
+
+
+
 
 
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value
@@ -158,7 +202,7 @@ void free_Node(btree_node *node){
 }
 
 void free_Tree(btree *tree){
-  btree_node *root = tree->root;
+  free_Node(tree->root);
   free(tree);
 }
 
@@ -171,16 +215,24 @@ int main(){
   insertKey(35, mytree);
   insertKey(15, mytree);
   insertKey(12, mytree);
-  insertKey(456, mytree);
+  // insertKey(456, mytree);
   // printf("%d\n", mytree->root->keys[0]);
   // printf("%d\n", mytree->root->Children[0]->keys[0]);
   // printf("%d\n", mytree->root->Children[1]->keys[0]);
   // printf("%d\n", mytree->root->Children[1]->keys[1]);
   // printf("%d\n", mytree->root->keys[2]);
   // printf("Root node keys are : %d", )
-  SearchKey(mytree->root, 12);
-  SearchKey(mytree->root, 17);
-  SearchKey(mytree->root, 456);
+  // SearchKey(mytree->root, 12);
+  // SearchKey(mytree->root, 17);
+  // SearchKey(mytree->root, 456);
+  deleteKey(12, mytree->root);
+  printf("%d\n", mytree->root->keys[0]);
+  printf("%d\n", mytree->root->keys[1]);
+  printf("%d\n", mytree->root->keys[2]);
+  // printf("%d\n", mytree->root->Children[0]->keys[0]);
+  // printf("%d\n", mytree->root->Children[1]->keys[0]);
+  // printf("%d\n", mytree->root->Children[1]->keys[1]);
+  
   free_Tree(mytree);
 
   
