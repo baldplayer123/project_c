@@ -4,6 +4,7 @@
 #include <stdlib.h>
 // #include <string.h>
 #include <stdbool.h>
+#include <string.h>
 #include "db.h"
 
 
@@ -13,7 +14,7 @@
 // Be carefull if i return only NewNode and not *NewNode, i will copy the value on the stack and lose the address in the heap
 struct btree_node *create_newNode(){
   struct btree_node *NewNode = malloc(sizeof(btree_node)); // If i dont initialise it as a pointer, it will be stored on the stacj and not the heap so no dynamic memory -> will lead to stack overflow with a lot of node
-  NewNode->keys = malloc(sizeof(int) * MAX_KEY);
+  NewNode->keys = malloc(sizeof(Rows) * MAX_KEY);
   NewNode->nb_keys = 0;
   NewNode->Children = malloc(sizeof(btree_node*) * ORDER_TREE); // *4 because max 4 children // Children étant tableau de pointer on alloue sizeof(*btreenode)
   return NewNode; // Do not return the pointer to newNode because it will copy the struct on the stack and lose memory reference to the right value on the stack
@@ -27,19 +28,28 @@ struct btree *createBtree(){ // This function has to be a pointer because we wil
   return tree; // Return the tree pointer 
 }
 
+Rows createRow(int id, char *username, char *password){
+  Rows row;
+  row.id = id;
+  strcpy(row.username, username);
+  strcpy(row.password, password);
+  return row;
+}
 
 
-void SearchKey(btree_node *node, int key){
+
+
+void SearchKey(btree_node *node, int id){
   int i = 0;
-  while (i < node->nb_keys &&  key > node->keys[i]) {
+  while (i < node->nb_keys &&  id > node->keys[i].id) {
     i++;
   }
-  if ( i < node->nb_keys && node->keys[i] == key) {
+  if ( i < node->nb_keys && node->keys[i].id == id) {
     printf("Found the key good!\n");
   } else if (node->leaf == true) {
     printf("Did not found the correct key in the tree");
   } else {
-    SearchKey(node->Children[i], key);
+    SearchKey(node->Children[i], id);
   }
 }
 
@@ -56,7 +66,6 @@ void insertSplitChild(btree_node *parent, int index){
       NewNode->keys[tmp] = oldroot->keys[j];
       tmp++;
       NewNode->nb_keys += 1;
-      
   }
 // If oldroot is not a leaf, copy children as well
 // What happens here is t hat we copy all the Children of old root bigger than
@@ -80,21 +89,21 @@ void insertSplitChild(btree_node *parent, int index){
 }
 
 
-void insertNonFullKey(btree_node *node, int key){
+void insertNonFullKey(btree_node *node, Rows row){
   int i = node->nb_keys - 1;
   if (node->leaf == true){
     // Leaf donc insert directement  Easy
-    while (i >= 0 && key < node->keys[i]) {
+    while (i >= 0 && row.id < node->keys[i].id) {
       node->keys[i + 1] = node->keys[i];
       i--;
     }
     i++;
-    node->keys[i] = key;
+    node->keys[i] = row;
     node->nb_keys += 1;
   }
   else {
     // Node n'est pas une feuille donc split child and insert
-    while (i >= 0 && key < node->keys[i] ) {
+    while (i >= 0 && row.id < node->keys[i].id ) {
       i--;
     }
     i++;
@@ -103,19 +112,19 @@ void insertNonFullKey(btree_node *node, int key){
       if (node->Children[i]->nb_keys == MAX_KEY) {
           insertSplitChild(node, i);
 
-          if (key > node->keys[i]) {
+          if (row.id > node->keys[i].id) {
               i++;
           }
       }
 
-      insertNonFullKey(node->Children[i], key);
+      insertNonFullKey(node->Children[i], row);
 
         }
   }    
 
 
 
-void insertKey(int key, btree *tree){
+void insertKey(Rows row, btree *tree){
   btree_node *root = tree->root;
   // Case where root is ful!!!
   if (root->nb_keys == MAX_KEY) {
@@ -125,16 +134,16 @@ void insertKey(int key, btree *tree){
     insertSplitChild(NewRoot, 0);
     // Update the bew tree root
     tree->root = NewRoot;
-    insertNonFullKey(NewRoot, key);    
+    insertNonFullKey(NewRoot, row);    
   } 
   // Case where root is not full
   else {
-    insertNonFullKey(root, key);
+    insertNonFullKey(root, row);
   }
 }
   
 // This return index of biggedst value
-int UTILS_getPred(btree_node *node){
+Rows UTILS_getPred(btree_node *node){
   btree_node *tmp = node;
   while (!tmp->leaf) {
     tmp = tmp->Children[tmp->nb_keys - 1]; // Recursive into the child node with the highest value of key and append to tmp that node
@@ -144,7 +153,7 @@ int UTILS_getPred(btree_node *node){
 
 
 // This return index of biggedt  value
-int UTILS_GetSuc(btree_node *node){
+Rows UTILS_GetSuc(btree_node *node){
   btree_node *tmp = node;
   while (!tmp->leaf) {
     tmp = tmp->Children[0]; // Recursive into the child node with the highest value of key and append to tmp that node
@@ -204,29 +213,29 @@ void deleteFromLeaf(btree_node *node, int index){
 
 void deleteFromNonLeaf(btree_node* node, int index){
   if (node->Children[index]->nb_keys > MIN_KEY) { // So if predecessor child has at least MIN KEY INSIDE
-    int pred = UTILS_getPred(node->Children[index]);
+    Rows pred = UTILS_getPred(node->Children[index]);
     node->keys[index] = pred;
-    deleteKey(pred, node->Children[index]);
+    deleteKey(pred.id, node->Children[index]);
   }
   else if (node->Children[index+1]->nb_keys > MIN_KEY) { // if successor child has at least MIN KEY INSIDE
-    int suc = UTILS_GetSuc(node->Children[index+1]);
+    Rows suc = UTILS_GetSuc(node->Children[index+1]);
     node->keys[index] = suc;
-    deleteKey(suc, node->Children[index+1]);
+    deleteKey(suc.id, node->Children[index+1]);
   }
   else { // If both node children are equals to MIN KEY
     UTILS_merge(node, index);
-    deleteKey(node->keys[index], node->Children[index]); 
+    deleteKey(node->keys[index].id, node->Children[index]); 
   }
 }
 
 
-void deleteKey(int key, btree_node* node){
+void deleteKey(int id, btree_node* node){
   // Look for correct place of insertion for node
   int i = 0;
-  while (i < node->nb_keys && key > node->keys[i]) {
+  while (i < node->nb_keys && id > node->keys[i].id) {
       i++;
   }
-  if (i < node->nb_keys && node->keys[i] == key) {
+  if (i < node->nb_keys && node->keys[i].id == id) {
 // Dont forget to check if min key is respected
     
   // Case 1 -> If the node is a leaf, just delete nothing else to check (Maybe delete the node if node has only one key)
@@ -240,7 +249,7 @@ void deleteKey(int key, btree_node* node){
   }
   // Go down a node to find the correct key
   else if ( i < node->nb_keys && !node->leaf) { // Case key not found
-      deleteKey(key, node->Children[i]);
+      deleteKey(id, node->Children[i]);
     }
   // did not find anything
   else {
@@ -259,7 +268,7 @@ void traverseTree(btree_node *node) {
         if (!node->leaf) {
             traverseTree(node->Children[i]);
         }
-        printf("%d - \n", node->keys[i]);
+        // printf("%d - %s - %s \n", node->keys[i].id, node->keys[i].username, node->keys[i].password);
     }
     if (!node->leaf) {
         traverseTree(node->Children[i]); // Last child

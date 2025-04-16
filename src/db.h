@@ -6,15 +6,26 @@
 #define MAX_KEY (ORDER_TREE - 1)
 #define MIN_KEY ((ORDER_TREE /2) - 1)
 
+// #define createRow(...) createRow(__VA_ARGS__, yanis, pass, NULL)
+ 
+
   // Btree
   // ---------------------
 
+typedef struct Rows{
+  int id;
+  char username[64];
+  char password[64];
+} Rows;
+
+
 typedef struct btree_node{
   bool leaf; // IS this a leaf
-  int *keys; // Array of keys
+  Rows *keys; // Array of keys
   int nb_keys; // nb of keys
   struct btree_node **Children; // Array of child pointers, each valye of tgus array points to a child
 } btree_node;
+
 
 typedef struct btree{
   struct btree_node *root;
@@ -25,23 +36,27 @@ typedef struct btree{
 btree_node *create_newNode(void);
 btree *createBtree(void);
 
+// Create Rows
+Rows createRow(int id, char *username, char *password);
+
+
 // Insertion
-void insertKey(int key, btree *tree);
-void insertNonFullKey(btree_node *node, int key);
+void insertKey(Rows row, btree *tree);
+void insertNonFullKey(btree_node *node, Rows row);
 void insertSplitChild(btree_node *parent, int index);
 
 // Deletion
-void deleteKey(int key, btree_node* node);
+void deleteKey(int id, btree_node* node);
 void deleteFromLeaf(btree_node *node, int index);
 void deleteFromNonLeaf(btree_node* node, int index);
 
-// Search
-void SearchKey(btree_node *node, int key);
+// Search by id
+void SearchKey(btree_node *node, int id);
 void traverseTree(btree_node *node);
 
 // Utilities
-int UTILS_getPred(btree_node *node);
-int UTILS_GetSuc(btree_node *node);
+Rows UTILS_getPred(btree_node *node);
+Rows UTILS_GetSuc(btree_node *node);
 void UTILS_merge(btree_node *node, int index);
   
 // Cleanup

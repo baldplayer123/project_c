@@ -8,10 +8,12 @@
 void  btree_test_Insert100values(){
   btree *tree = createBtree();
   for (int i = 0; i <= 100; i++) {
-    insertKey(i, tree);
+    Rows row = createRow(i, "user" , "pass");    
+    insertKey(row, tree);
   }
-  int lastValue = tree->root->keys[0] - 60;
+  int lastValue = tree->root->keys[0].id - 60;
   int ret = btree_test_traversalreturn(tree->root, &lastValue);
+  // traverseTree(tree->root);
   free_Tree(tree);
   if (ret == 1) {
     printf("End - Test passed without issues\n");
@@ -26,7 +28,9 @@ void  btree_test_Insert100values(){
 void btree_test_InsertAndDelete(){
   btree *tree = createBtree();
   for (int i = 0; i <= 100; i++) {
-    insertKey(i, tree);
+    Rows row ;
+    row.id = i;
+    insertKey(row, tree);
   }
   deleteKey(78, tree->root);
   deleteKey(90, tree->root);
@@ -36,13 +40,16 @@ void btree_test_InsertAndDelete(){
   deleteKey(61, tree->root);
   deleteKey(43, tree->root);
 
-  int lastValue = tree->root->keys[0] - 60;
+  int lastValue = tree->root->keys[0].id - 60;
   int ret = btree_test_traversalreturn(tree->root, &lastValue);
   free_Tree(tree);
   if (ret == 1) {
+
+    traverseTree(tree->root);
     printf("End - Test passed without issues\n");
   }
   else {
+    traverseTree(tree->root);
     printf("End - Test failed!\n");
     exit(1);
   }
@@ -58,10 +65,10 @@ int btree_test_traversalreturn(btree_node* node, int* lastValue) {
                 return 0;
             }
         }
-        if (node->keys[i] <= *lastValue) {
+        if (node->keys[i].id <= *lastValue) {
             return 0;
         }
-        *lastValue = node->keys[i];
+        *lastValue = node->keys[i].id;
     }
     if (!node->leaf) {
         if (!btree_test_traversalreturn(node->Children[i], lastValue)) {
