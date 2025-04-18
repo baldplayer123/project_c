@@ -56,23 +56,61 @@ void btree_test_InsertAndDelete(){
   
 }
 
+int isNodeCorrect(btree_node *node){  
+  if (node->nb_keys >= MIN_KEY && node->nb_keys <= MAX_KEY) {
+    return 0;
+  }
+  else{
+    return 1;
+  }
+}
+
+int isChildrenCorrect(btree_node *node){
+  int expectedChildren = node->nb_keys + 1;
+  if (node->leaf == true){
+    return 0;
+  }
+  else {
+    for (int j = 0; j < expectedChildren; j++) {
+      if (node->Children[j] == NULL) {
+        return 1;
+        }
+    }
+    return 0;
+  }
+}
 
 int btree_test_traversalreturn(btree_node* node, int* lastValue) {
     int i;
     for (i = 0; i < node->nb_keys; i++) {
         if (!node->leaf) {
             if (!btree_test_traversalreturn(node->Children[i], lastValue)) {
+              if (isNodeCorrect(node->Children[i]) == 0 && isChildrenCorrect(node->Children[i]) == 0) {
                 return 0;
+              }
+              else {
+                return 1;
+              }
             }
         }
         if (node->keys[i].id <= *lastValue) {
-            return 0;
+              if (isNodeCorrect(node->Children[i]) == 0 && isChildrenCorrect(node->Children[i]) == 0) {
+                return 0;
+              }
+              else {
+                return 1;
+              }
         }
         *lastValue = node->keys[i].id;
     }
     if (!node->leaf) {
         if (!btree_test_traversalreturn(node->Children[i], lastValue)) {
-            return 0;
+            if (isNodeCorrect(node->Children[i]) == 0 && isChildrenCorrect(node->Children[i]) == 0) {
+              return 0;
+            }
+            else {
+              return 1;
+            }
         }
     }
     return 1;

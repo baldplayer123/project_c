@@ -6,6 +6,11 @@
 #define MAX_KEY (ORDER_TREE - 1)
 #define MIN_KEY ((ORDER_TREE /2) - 1)
 
+// Create serialisation for csv
+// write and load btree on file
+// 
+
+
 // #define createRow(...) createRow(__VA_ARGS__, yanis, pass, NULL)
  
 
