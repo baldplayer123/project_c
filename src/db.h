@@ -1,6 +1,7 @@
 #ifndef DB_H
 #define DB_H
 #include <stdbool.h>
+#include <stdio.h>
 
 #define ORDER_TREE 4
 #define MAX_KEY (ORDER_TREE - 1)
@@ -12,7 +13,9 @@
 
 
 // #define createRow(...) createRow(__VA_ARGS__, yanis, pass, NULL)
- 
+
+
+
 
   // Btree
   // ---------------------
@@ -36,6 +39,20 @@ typedef struct btree{
   struct btree_node *root;
 } btree;
 
+  // Main utils
+  // ---------------------
+
+void selectTables();
+void deleteTables();
+
+
+  // Save and read file
+  // ---------------------
+
+void listTables();
+bool dirExist();
+void saveTable(btree_node *node, char *tablename);
+void saveTreeRecursive(btree_node *node, FILE *file);
 
 // Creation & Initialization
 btree_node *create_newNode(void);
@@ -43,7 +60,8 @@ btree *createBtree(void);
 
 // Create Rows
 Rows createRow(int id, char *username, char *password);
-
+void Serialize(Rows row);
+void Unserialize(Rows row);
 
 // Insertion
 void insertKey(Rows row, btree *tree);

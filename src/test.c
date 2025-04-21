@@ -14,6 +14,7 @@ void  btree_test_Insert100values(){
   int lastValue = tree->root->keys[0].id - 60;
   int ret = btree_test_traversalreturn(tree->root, &lastValue);
   // traverseTree(tree->root);
+  saveTable(tree->root, "testtable");
   free_Tree(tree);
   if (ret == 1) {
     printf("End - Test passed without issues\n");
@@ -122,7 +123,7 @@ void run_all_tests(){
   printf("Start - Insertion of 40 values in btree!\n");
   btree_test_Insert100values();
   
-  printf("Start - Deletion of some values in btree!\n");
-  btree_test_Insert100values();
+  // printf("Start - Deletion of some values in btree!\n");
+  // btree_test_Insert100values();
 }
 
