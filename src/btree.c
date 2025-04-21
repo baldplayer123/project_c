@@ -36,6 +36,13 @@ Rows createRow(int id, char *username, char *password){
   return row;
 }
 
+char *Serialize(Rows row){
+  char *csvRow = malloc(sizeof(char) * 256);
+  snprintf(csvRow, 256,"%d,%s,%s\n", row.id, row.username, row.password);
+  printf("%s", csvRow);
+  return csvRow;
+}
+
 
 
 
@@ -293,37 +300,4 @@ void free_Tree(btree *tree){
   free_Node(tree->root);
   free(tree);
 }
-
-
-// int main(){
-//   printf("Program begins \n");
-//   struct btree *mytree = createBtree(); // Address of my tree in the heap
-//   printf("%p\n", mytree->root);
-//   // printf("%d\n", mytree->root->leaf);
-//   insertKey(35, mytree);
-//   insertKey(15, mytree);
-//   insertKey(12, mytree);
-//   // insertKey(456, mytree);
-//   // printf("%d\n", mytree->root->keys[0]);
-//   // printf("%d\n", mytree->root->Children[0]->keys[0]);
-//   // printf("%d\n", mytree->root->Children[1]->keys[0]);
-//   // printf("%d\n", mytree->root->Children[1]->keys[1]);
-//   // printf("%d\n", mytree->root->keys[2]);
-//   // printf("Root node keys are : %d", )
-//   // SearchKey(mytree->root, 12);
-//   // SearchKey(mytree->root, 17);
-//   // SearchKey(mytree->root, 456);
-//   deleteKey(12, mytree->root);
-//   printf("%d\n", mytree->root->keys[0]);
-//   printf("%d\n", mytree->root->keys[1]);
-//   printf("%d\n", mytree->root->keys[2]);
-//   // printf("%d\n", mytree->root->Children[0]->keys[0]);
-//   // printf("%d\n", mytree->root->Children[1]->keys[0]);
-//   // printf("%d\n", mytree->root->Children[1]->keys[1]);
-  
-//   free_Tree(mytree);
-
-  
-  
-// } 
 

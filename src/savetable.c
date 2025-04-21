@@ -13,7 +13,9 @@ void saveTreeRecursive(btree_node *node, FILE *file) {
         if (!node->leaf) {
             saveTreeRecursive(node->Children[i], file);
         }
-        fprintf(file, "%d - %s - %s\n", node->keys[i].id, node->keys[i].username, node->keys[i].password);
+        char *csvRow  = Serialize(node->keys[i]);
+        fprintf(file,"%s",csvRow);
+        free(csvRow);
     }
     if (!node->leaf) {
         saveTreeRecursive(node->Children[i], file);

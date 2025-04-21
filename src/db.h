@@ -60,7 +60,7 @@ btree *createBtree(void);
 
 // Create Rows
 Rows createRow(int id, char *username, char *password);
-void Serialize(Rows row);
+char *Serialize(Rows row);
 void Unserialize(Rows row);
 
 // Insertion
