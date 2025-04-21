@@ -39,10 +39,17 @@ Rows createRow(int id, char *username, char *password){
 char *Serialize(Rows row){
   char *csvRow = malloc(sizeof(char) * 256);
   snprintf(csvRow, 256,"%d,%s,%s\n", row.id, row.username, row.password);
-  printf("%s", csvRow);
   return csvRow;
 }
 
+Rows Unserialize(char *line){
+  int id = atoi(strtok(line,","));
+  char *username = strtok(NULL, ",");
+  char *password = strtok(NULL, ",");
+  Rows tmpRow = createRow(id, username, password);
+
+  return tmpRow;
+}
 
 
 

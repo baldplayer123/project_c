@@ -9,7 +9,7 @@
 
 // Create serialisation for csv
 // write and load btree on file
-// 
+// Create counter of keys inside the btree
 
 
 // #define createRow(...) createRow(__VA_ARGS__, yanis, pass, NULL)
@@ -42,17 +42,20 @@ typedef struct btree{
   // Main utils
   // ---------------------
 
+void useTable(btree *tree);
 void selectTables();
 void deleteTables();
+bool getCommand(btree *tree);
+void commandInsert(char *buff, btree *tree);
 
-
-  // Save and read file
+  // Save and load backups
   // ---------------------
 
 void listTables();
 bool dirExist();
 void saveTable(btree_node *node, char *tablename);
 void saveTreeRecursive(btree_node *node, FILE *file);
+btree *loadTable(char *tablename);
 
 // Creation & Initialization
 btree_node *create_newNode(void);
@@ -61,7 +64,7 @@ btree *createBtree(void);
 // Create Rows
 Rows createRow(int id, char *username, char *password);
 char *Serialize(Rows row);
-void Unserialize(Rows row);
+Rows Unserialize(char *line);
 
 // Insertion
 void insertKey(Rows row, btree *tree);

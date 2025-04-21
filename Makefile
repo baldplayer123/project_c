@@ -5,9 +5,9 @@ CC= gcc
 CO= -Wall -Wextra
 
 ## Source
-SRC = src/main.c src/btree.c src/test.c src/savetable.c src/db.h
+SRC = src/main.c src/btree.c src/test.c src/savetable.c src/command.c src/db.h
 
-projectdb: 
+projectdb:	
 	$(CC) $(CO) $(SRC) -o projectdb
 
 clean:

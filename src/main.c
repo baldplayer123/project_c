@@ -8,7 +8,19 @@
 void selectTable(){
 	printf("\nList of tables available\n");
 	listTables();
-	
+	// ADD VERIF IF THE FILKE EXIST
+	char tablename[256];
+	fgets(tablename, sizeof(char) * 256, stdin);
+	tablename[strcspn(tablename, "\n")] = 0;
+	// printf("%s", tablename);
+	btree *tree = loadTable(tablename);
+	if (tree == NULL) {
+		return;
+	}
+	useTable(tree);
+	saveTable(tree->root, tablename);
+	printf("Table was saved !\n");
+	free_Tree(tree);
 }
 
 
@@ -24,7 +36,7 @@ int main(int argc, char* argv[], char* envp[]){
 	printf("Welcome to this database !\n Check the README before using ! \n");
 	run_all_tests();
 	
-	char choice[1];
+	char choice[10];
 	int choice_int;
 	while (1) {
 		printf("\nMenu:\n");
@@ -33,7 +45,12 @@ int main(int argc, char* argv[], char* envp[]){
 		printf("3. Delete existing Table\n");
 		printf("4. Exit\n");
 		printf("Enter your choice: ");
-		scanf("%s", choice);		
+		if (fgets(choice, sizeof(choice), stdin) == NULL){
+			printf("Error reading input\n");
+			continue;
+		}
+		choice[strcspn(choice, "\n")] = 0;
+
 		choice_int = atoi(choice);
 
 		switch(choice_int) {

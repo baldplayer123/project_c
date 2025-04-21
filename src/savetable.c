@@ -6,6 +6,26 @@
 
 
 
+btree *loadTable(char *tablename){
+    char path[64];
+    strcpy(path, "tables/");
+    strcat(path, tablename);
+    FILE *file = fopen(path, "r");
+    if (file == NULL) {
+      printf("This table does not exist\n");
+      return NULL;
+    }
+    char line[256];
+    Rows tmpRow;
+    btree *tree = createBtree();
+    while ((fgets(line, sizeof(line), file)) != NULL) {
+      line[strcspn(line, "\n")] = 0;
+      tmpRow = Unserialize(line);
+      insertKey(tmpRow, tree);
+    }
+    fclose(file);
+    return tree;
+}
 
 void saveTreeRecursive(btree_node *node, FILE *file) {
     int i;
