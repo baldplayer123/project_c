@@ -237,15 +237,18 @@ void deleteFromNonLeaf(btree_node* node, int index){
     deleteKey(suc.id, node->Children[index+1]);
   }
   else { // If both node children are equals to MIN KEY
+    Rows deletedKey = node->keys[index];
     UTILS_merge(node, index);
-    deleteKey(node->keys[index].id, node->Children[index]); 
+    deleteKey(deletedKey.id, node->Children[index]);
   }
 }
 
 
 void deleteKey(int id, btree_node* node){
+  
   // Look for correct place of insertion for node
   int i = 0;
+  printf("Checking key %d against target %d\n", node->keys[i].id, id);
   while (i < node->nb_keys && id > node->keys[i].id) {
       i++;
   }
@@ -262,7 +265,7 @@ void deleteKey(int id, btree_node* node){
     }
   }
   // Go down a node to find the correct key
-  else if ( i < node->nb_keys && !node->leaf) { // Case key not found
+  else if (!node->leaf) { // Case key not found
       deleteKey(id, node->Children[i]);
     }
   // did not find anything

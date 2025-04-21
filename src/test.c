@@ -123,7 +123,7 @@ void run_all_tests(){
   printf("Start - Insertion of 40 values in btree!\n");
   btree_test_Insert100values();
   
-  // printf("Start - Deletion of some values in btree!\n");
-  // btree_test_Insert100values();
+  printf("Start - Deletion of some values in btree!\n");
+  btree_test_Insert100values();
 }
 

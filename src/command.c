@@ -6,6 +6,16 @@
 
 
 
+void commandDelete(char *buff, btree *tree){
+  strtok(buff, " ");
+  char *id = strtok(NULL, " ");
+  id[strcspn(id, "\n")] = 0;
+  int int_id = atoi(id);
+  printf("NUMBER IS %d\n", int_id);
+  deleteKey(int_id, tree->root);
+  printf("Value deleted successfully\n");
+  return;
+}
 
 void commandInsert(char *buff, btree *tree){
   // printf("%s\n", buff);
@@ -33,7 +43,7 @@ bool getCommand(btree *tree){
     printf("FUCK YEAH\n");
   }
   else if (!strncmp(buff, "delete", 6)) {
-    printf("FUCK YEAH\n");
+    commandDelete(buff, tree);
   }
   else if (!strncmp(buff, "exit", 4)) {
     return 1;

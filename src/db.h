@@ -47,6 +47,7 @@ void selectTables();
 void deleteTables();
 bool getCommand(btree *tree);
 void commandInsert(char *buff, btree *tree);
+void commandDelete(char *buff, btree *tree);
 
   // Save and load backups
   // ---------------------

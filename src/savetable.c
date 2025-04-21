@@ -21,6 +21,7 @@ btree *loadTable(char *tablename){
     while ((fgets(line, sizeof(line), file)) != NULL) {
       line[strcspn(line, "\n")] = 0;
       tmpRow = Unserialize(line);
+      printf("Loaded row: id=%d username=%s password=%s\n", tmpRow.id, tmpRow.username, tmpRow.password);
       insertKey(tmpRow, tree);
     }
     fclose(file);
