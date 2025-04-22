@@ -42,12 +42,14 @@ typedef struct btree{
   // Main utils
   // ---------------------
 
-void useTable(btree *tree);
-void selectTables();
-void deleteTables();
-bool getCommand(btree *tree);
+void useTable(btree *tree, char* tablename);
+void selectTables(char *tablename);
+void deleteTables(char *tablename);
+bool getCommand(btree *tree, char* tablename);
 void commandInsert(char *buff, btree *tree);
 void commandDelete(char *buff, btree *tree);
+void commandSelect(char *buff, btree *tree);
+void commandListall(char *buff, btree *tree);
 
   // Save and load backups
   // ---------------------

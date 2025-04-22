@@ -2,12 +2,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/select.h>
 #include "db.h"
 
 
+void commandListall(char *buff, btree *tree){
+  traverseTree(tree->root);
+}
+
+void commandSelect(char *buff, btree *tree){
+  char copy_buff[64];
+  strcpy(copy_buff, buff);
+  strtok(copy_buff, " ");
+  char *id = strtok(NULL, " ");
+  id[strcspn(id, "\n")] = 0;
+  int int_id = atoi(id);
+  SearchKey(tree->root, int_id);
+  return;
+
+}
 
 void commandDelete(char *buff, btree *tree){
-  strtok(buff, " ");
+  char copy_buff[64];
+  strcpy(copy_buff, buff);
+  strtok(copy_buff, " ");
   char *id = strtok(NULL, " ");
   id[strcspn(id, "\n")] = 0;
   int int_id = atoi(id);
@@ -18,9 +36,11 @@ void commandDelete(char *buff, btree *tree){
 }
 
 void commandInsert(char *buff, btree *tree){
+  char copy_buff[64];
+  strcpy(copy_buff, buff);
   // printf("%s\n", buff);
   int id = rand(); 
-  strtok(buff, " "); 
+  strtok(copy_buff, " "); 
   char *username = strtok(NULL, " ");
   char *password = strtok(NULL, " ");
   Rows tmpRow = createRow(id, username, password);
@@ -29,18 +49,19 @@ void commandInsert(char *buff, btree *tree){
   return;
 }
 
-bool getCommand(btree *tree){
-  printf("Working in the table, what do you want to do ?\nAvailable command: insert, select, search, delete, exit\n");
+bool getCommand(btree *tree, char *tablename){
+  printf("\n%s> what do you want to do ?\n%s> Available command: insert, select, listall, delete, exit\n", tablename, tablename);
   char buff[100];
+  printf(" %s> ", tablename);
   fgets(buff, 100, stdin);
   if (!strncmp(buff, "insert", 6)) {
     commandInsert(buff, tree);
   }
   else if (!strncmp(buff, "select", 6)) {
-    printf("FUCK YEAH\n");
+    commandSelect(buff, tree);
   }
-  else if (!strncmp(buff, "search", 6)) {
-    printf("FUCK YEAH\n");
+  else if (!strncmp(buff, "listall", 7)) {
+    commandListall(buff, tree);
   }
   else if (!strncmp(buff, "delete", 6)) {
     commandDelete(buff, tree);
@@ -56,9 +77,9 @@ bool getCommand(btree *tree){
 
 
 
-void useTable(btree *tree){
+void useTable(btree *tree, char *tablename){
   while (true) {
-    int ret = getCommand(tree);
+    int ret = getCommand(tree, tablename);
     if (ret == 1) {
       break;
     }

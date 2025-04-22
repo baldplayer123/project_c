@@ -21,7 +21,7 @@ btree *loadTable(char *tablename){
     while ((fgets(line, sizeof(line), file)) != NULL) {
       line[strcspn(line, "\n")] = 0;
       tmpRow = Unserialize(line);
-      printf("Loaded row: id=%d username=%s password=%s\n", tmpRow.id, tmpRow.username, tmpRow.password);
+      // printf("Loaded row: id=%d username=%s password=%s\n", tmpRow.id, tmpRow.username, tmpRow.password);
       insertKey(tmpRow, tree);
     }
     fclose(file);
@@ -70,7 +70,7 @@ void listTables(){
   struct dirent *entry;
   while ((entry = readdir(dir)) != NULL) {
     if (!(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)) { // Do nothing if . and ..
-      printf("- %s\n", entry->d_name);
+      printf("| %s  |\n ", entry->d_name );
     }
     else {
     }
