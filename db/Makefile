@@ -2,7 +2,7 @@
 CC= gcc
 
 ## Options de compilation
-CO= -Wall -Wextra
+CO= -g -Wall -Wextra
 
 ## Source
 SRC = src/main.c src/btree.c src/test.c src/savetable.c src/command.c src/db.h
