@@ -13,14 +13,36 @@ void selectTable(char *tablename){
 	}
 	useTable(tree, tablename);
 	saveTable(tree->root, tablename);
-	printf("Table was saved !\n");
+	printf("Table was saved !\n\n");
 	free_Tree(tree);
 }
 
+void createTables(char *tablename){
+	tablename[strcspn(tablename, "\n")] = 0;
+	btree *tree = createBtree();
+	saveTable(tree->root, tablename);
+	free(tree);
+	printf("Table created\n\n");
+	
+}
 
-void deleteTable(char *tablename){
-	// printf("\nList of tables available\n");
-	// printf("\nType the name of the table to be deleted\n");
+void deleteTables(char *tablename){
+	tablename[strcspn(tablename, "\n")] = 0;
+	char path[64];
+  strcpy(path, "tables/");
+  strcat(path, tablename);
+  FILE *file = fopen(path, "r");
+  if (file == NULL) {
+    printf("This table does not exist\n");
+    return;
+  }
+  fclose(file);
+	if (remove(path) == 0){
+		printf("File deleted successfully\n");
+	}
+	else {
+		printf("Error in the deletion of the file\n");
+	}
 	
 }
 
@@ -48,14 +70,19 @@ int main(){
 		  }
 		  else if (!strncmp(buffer, "create", 6)) {
 		    // commandSelect(buff, tree);
+		    strtok(buffer, " ");
+		    createTables(strtok(NULL, " "));
 		  }
 		  else if (!strncmp(buffer, "delete", 6)) {
-		    // printf("FUCK YEAH\n");
+		    strtok(buffer, " ");
+		    deleteTables(strtok(NULL, " "));
 		  }
 		  else if (!strncmp(buffer, "list", 4)) {
-		    // return 1;
+		    listTables();
 		  }
 		  else if (!strncmp(buffer, "exit", 4)) {
+		  	printf("goodbye.\n");
+		  	exit(0);
 		    // return 1;
 		  }
 		  else {

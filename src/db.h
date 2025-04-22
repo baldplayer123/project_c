@@ -45,6 +45,7 @@ typedef struct btree{
 void useTable(btree *tree, char* tablename);
 void selectTables(char *tablename);
 void deleteTables(char *tablename);
+void createTables(char *tablename);
 bool getCommand(btree *tree, char* tablename);
 void commandInsert(char *buff, btree *tree);
 void commandDelete(char *buff, btree *tree);
