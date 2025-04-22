@@ -50,7 +50,9 @@ bool getCommand(btree *tree, char* tablename);
 void commandInsert(char *buff, btree *tree);
 void commandDelete(char *buff, btree *tree);
 void commandSelect(char *buff, btree *tree);
-void commandListall(char *buff, btree *tree);
+void commandListall(btree *tree);
+int findMaxID(btree_node *node);
+int generateID(btree *tree);
 
   // Save and load backups
   // ---------------------

@@ -6,7 +6,7 @@
 #include "db.h"
 
 
-void commandListall(char *buff, btree *tree){
+void commandListall(btree *tree){
   traverseTree(tree->root);
 }
 
@@ -39,7 +39,7 @@ void commandInsert(char *buff, btree *tree){
   char copy_buff[64];
   strcpy(copy_buff, buff);
   // printf("%s\n", buff);
-  int id = rand(); 
+  int id = generateID(tree);
   strtok(copy_buff, " "); 
   char *username = strtok(NULL, " ");
   char *password = strtok(NULL, " ");
@@ -61,7 +61,7 @@ bool getCommand(btree *tree, char *tablename){
     commandSelect(buff, tree);
   }
   else if (!strncmp(buff, "listall", 7)) {
-    commandListall(buff, tree);
+    commandListall(tree);
   }
   else if (!strncmp(buff, "delete", 6)) {
     commandDelete(buff, tree);

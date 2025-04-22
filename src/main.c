@@ -5,7 +5,7 @@
 #include<stdbool.h>
 #include "db.h"
 
-void selectTable(char *tablename){
+void selectTables(char *tablename){
 	tablename[strcspn(tablename, "\n")] = 0;
 	btree *tree = loadTable(tablename);
 	if (tree == NULL) {
@@ -43,7 +43,6 @@ void deleteTables(char *tablename){
 	else {
 		printf("Error in the deletion of the file\n");
 	}
-	
 }
 
 
@@ -66,7 +65,7 @@ int main(){
 		  if (!strncmp(buffer, "select", 6)) {
 		    // commandInsert(buff, tree);
 		    strtok(buffer, " ");
-		    selectTable(strtok(NULL, " "));
+		    selectTables(strtok(NULL, " "));
 		  }
 		  else if (!strncmp(buffer, "create", 6)) {
 		    // commandSelect(buff, tree);
@@ -83,7 +82,6 @@ int main(){
 		  else if (!strncmp(buffer, "exit", 4)) {
 		  	printf("goodbye.\n");
 		  	exit(0);
-		    // return 1;
 		  }
 		  else {
 		    printf("Invalid command\n");
@@ -92,21 +90,3 @@ int main(){
 		}
 
 }
-		// switch(choice_int) {
-		// 	case 1:
-		// 		printf("Select existing Table\n");
-		// 		selectTable();
-		// 		break;
-		// 	case 2:
-		// 		printf("Create a new Table\n");
-		// 		break;
-		// 	case 3:
-		// 		printf("Delete existing Table \n");
-		// 		deleteTable();
-		// 		break;
-		// 	case 4:
-		// 		printf("Program will exit now\n");
-		// 		exit(1);
-		// 	default:
-		// 		printf("Wrong input, choose correct number!\n");
-		

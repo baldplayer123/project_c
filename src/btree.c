@@ -35,39 +35,53 @@ Rows createRow(int id, char *username, char *password){
   return row;
 }
 
+
+
+  
+int findMaxID(btree_node *node) {
+    int max_id = -1;
+    int i;
+
+    for (i = 0; i < node->nb_keys; i++) {
+        if (node->keys[i].id > max_id) {
+            max_id = node->keys[i].id;
+        }
+        if (!node->leaf) {
+            int child_max = findMaxID(node->Children[i]);
+            if (child_max > max_id) {
+                max_id = child_max;
+            }
+        }
+    }
+
+    if (!node->leaf) {
+        int child_max = findMaxID(node->Children[i]);
+        if (child_max > max_id) {
+            max_id = child_max;
+        }
+    }
+
+    return max_id;
+}
+
+int generateID(btree *tree) {
+    int max_id = findMaxID(tree->root);
+    return max_id + 1;
+}
+
 char *Serialize(Rows row){
   char *csvRow = malloc(sizeof(char) * 256);
-  snprintf(csvRow, 256,"%d,%s,%s\n", row.id, row.username, row.password);
+  snprintf(csvRow, 256,"%d,%s,%s", row.id, row.username, row.password);
   return csvRow;
 }
 
-// Rows Unserialize(char *line){
-//   int id = atoi(strtok(line,","));
-//   char *username = strtok(NULL, ",");
-//   char *password = strtok(NULL, ",");
-//   Rows tmpRow = createRow(id, username, password);
+Rows Unserialize(char *line){
+  int id = atoi(strtok(line,","));
+  char *username = strtok(NULL, ",");
+  char *password = strtok(NULL, ",");
+  Rows tmpRow = createRow(id, username, password);
 
-//   return tmpRow;
-// }
-
-Rows Unserialize(char *line) {
-    char *id_token = strtok(line, ",");
-    char *username_token = strtok(NULL, ",");
-    char *password_token = strtok(NULL, ",");
-
-    if (id_token == NULL || username_token == NULL || password_token == NULL) {
-        printf("Error in reading the rows\n");
-    }
-
-    int id = atoi(id_token);
-    char username_copy[64];
-    char password_copy[64];
-    strncpy(username_copy, username_token, sizeof(username_copy));
-    username_copy[sizeof(username_copy)-1] = 0;  // Safe null-termination
-    strncpy(password_copy, password_token, sizeof(password_copy));
-    password_copy[sizeof(password_copy)-1] = 0;
-    Rows tmpRow = createRow(id, username_copy, password_copy);
-    return tmpRow;
+  return tmpRow;
 }
 
 void SearchKey(btree_node *node, int id){
@@ -289,10 +303,7 @@ void deleteKey(int id, btree_node* node){
   else {
     printf("Key not found!!!\n");
   }
-    
-
-    
-  }
+}
 
 
 
