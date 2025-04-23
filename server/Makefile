@@ -5,7 +5,7 @@ CC= gcc
 CO= -Wall -Wextra
 
 ## Source
-SRC = main.c
+SRC = server.c
 
 projectdb:	
 	$(CC) $(CO) $(SRC) -o serv
