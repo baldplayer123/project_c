@@ -1,4 +1,5 @@
 projectdb
 src/btree
-tables
+tables/*
 src/todo.txt
+server/serv

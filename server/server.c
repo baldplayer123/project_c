@@ -134,21 +134,8 @@ int main(){
   pthread_create(&mainLoop, NULL, ListenToClient, &socketfd);
   printf("Interact -> ");
   while (1) {
-    // printf("Interact -> ");
     char buffer[64];
     fgets(buffer, sizeof(buffer), stdin);
   }
-  // printf("Socket binded and listening !\nWaiting for new connexion...\n");
-  // while (1) {
-  //   struct sockaddr_in client_addr;
-  //   socklen_t client_len = sizeof(client_addr);
-  //   int newsocket = accept(socketfd, (struct sockaddr *) &client_addr, &client_len);
-  //   infoclient *client  = malloc(sizeof(infoclient));
-  //   client->client = newsocket; 
-  //   inet_ntop(AF_INET, &client_addr.sin_addr, client->ip , sizeof(client->ip));
-  //   pthread_t newthread;
-  //   pthread_create(&newthread, NULL, handleClient, client);
-  //   pthread_detach(newthread);
-  // }
 
 }
