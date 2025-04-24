@@ -1,0 +1,12 @@
+services:
+  victimedebian:
+    build: ./ldpreload_malware
+    ports:
+      - "5000:5000"
+    command: ["tail", "-f", "/dev/null"]
+  victimessh:
+    build: .
+    ports:
+      - "5001:22"
+    # command: ["tail", "-f", "/dev/null"]
+      

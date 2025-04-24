@@ -1,34 +1,16 @@
-FROM debian
+FROM alpine:latest
 
-# Copy the malware to a temporary location (optional)
-COPY ./ldpreload_malware /malware/
+RUN apk update && apk add --no-cache openssh bash
 
-# Install required packages and set up locale
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
-        apt-utils \
-        locales \
-        gcc \
-        nano \
-        vim \
-    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
-    && rm -rf /var/lib/apt/lists/*
+RUN adduser -D sshvictims && \
+    echo "sshvictims:1234" | chpasswd
 
-# Create a non-root user
-RUN useradd -m -s /bin/bash maluser
+RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
-# Set root password (for debugging or su if needed)
-RUN echo "root:1234" | chpasswd
+RUN ssh-keygen -A
 
-# Move malware binary to user home, set ownership and permissions
-COPY ./ldpreload_malware /home/maluser/ldpreload_malware
-RUN chown maluser:maluser /home/maluser/ldpreload_malware && \
-    chmod +x /home/maluser/ldpreload_malware
+EXPOSE 22
 
-# Set working directory and switch to non-root user
-USER maluser
-WORKDIR /home/maluser
+CMD ["/usr/sbin/sshd","-D"]
 
-# Start Bash
-ENTRYPOINT ["/bin/bash"]
