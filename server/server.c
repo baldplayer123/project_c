@@ -23,7 +23,7 @@ void printLog(char *msg, ...){
   va_start(args, msg);
   vprintf(msg, args);
   va_end(args);
-  printf("Interact ->");
+  printf("Interact -> ");
   fflush(stdout);  
   // printf("%s", msg);
   
