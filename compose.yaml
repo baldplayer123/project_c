@@ -4,9 +4,17 @@ services:
     ports:
       - "5000:5000"
     command: ["tail", "-f", "/dev/null"]
+
   victimessh:
     build: .
     ports:
       - "5001:22"
     # command: ["tail", "-f", "/dev/null"]
+
+  serverc2:
+    build: ./server
+    ports:
+      - "6000:6000"
+    command: ["tail", "-f", "/dev/null"]
+  
       
