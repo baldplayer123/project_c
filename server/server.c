@@ -119,7 +119,7 @@ int main(){
     printLog("[LOG] Error code -1 - Failed to initialise a socket ");
   }
   addr.sin_family = AF_INET; // Address on local system
-  addr.sin_port = htons(4001); // Port on local system
+  addr.sin_port = htons(6000); // Port on local system
   addr.sin_addr.s_addr = INADDR_ANY; // Check more available options ??
   if (bind(socketfd, (const struct sockaddr *) &addr, sizeof(addr)) == -1){
     printLog("[LOG] Error code -1 -  in binding the port \n");
