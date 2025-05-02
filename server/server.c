@@ -50,7 +50,7 @@ void *handleClient(void *arg){
         clientinput = strtok_r(NULL, " ", &saveTOK);
         if (clientinput != NULL) {
           strncpy(current.username, clientinput, 64);
-          current.username[strlen(current.username)] = '\0';
+          current.username[63] = '\0';
           clientinput = strtok_r(NULL, " ", &saveTOK);
           if (clientinput != NULL) {
             if (strtok_r(NULL, " ", &saveTOK) != NULL) {
