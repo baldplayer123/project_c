@@ -20,13 +20,13 @@ extern struct sockaddr_in client_addr;
 
 typedef struct infoclient {
   int client;
-  char ip[INET_ADDRSTRLEN];
+  char ip[16];
 } infoclient;
 
 typedef struct malwareRetrieve{
   char username[64];
   char password[64];
-  char ipaddr[INET_ADDRSTRLEN];
+  char ipaddr[16];
 } malwareRetrieve;
 
 

@@ -31,25 +31,26 @@ void printLog(char *msg, ...){
 
 void *handleClient(void *arg){
   infoclient *client = (infoclient*)  arg;
+  if (client == NULL) {
+    printf("Client == NULL !!!\n");
+    return NULL;
+  }
   printLog("[LOG][id: %d - from: %s] Connexion established and is being handled !\n", client->client, client->ip);
   while (1) {
-    // Check if con is alive
-    char msg[64] = "check if conn is alive\n";
-    if (write(client->client, msg, sizeof(msg)) != sizeof(msg)){
-      printLog("conn is dead\n");
-      break;
-    }
     char buffer[512];
-    if (recv(client->client, buffer, sizeof(buffer), 0) != -1) {
+    printf("TEST SHIT \n");
+    if (recv(client->client, buffer, sizeof(buffer), 0) >= 0) {
+      printf("Raw message received -> %s", buffer);
       buffer[strcspn(buffer, "\r\n")] = '\0';
       printLog("[LOG][id: %d - from: %s] Message received is %s \n",client->client, client->ip, buffer);
       char *saveTOK;
       char *clientinput = strtok_r(buffer, " ", &saveTOK);
-      if (strncmp(clientinput, API_COMMAND, sizeof(API_COMMAND)) == 0 ) {
+      if (strncmp(clientinput, API_COMMAND, strlen(API_COMMAND)) == 0 ) {
         malwareRetrieve current;
         clientinput = strtok_r(NULL, " ", &saveTOK);
         if (clientinput != NULL) {
           strncpy(current.username, clientinput, 64);
+          current.username[strlen(current.username)] = '\0';
           clientinput = strtok_r(NULL, " ", &saveTOK);
           if (clientinput != NULL) {
             if (strtok_r(NULL, " ", &saveTOK) != NULL) {
@@ -58,8 +59,10 @@ void *handleClient(void *arg){
               break;
             }
             strncpy(current.password, clientinput, 64);
+            current.password[strlen(current.password)] = '\0';
             printLog("[LOG][id: %d - from: %s] Successfull connexion to the command\n --> Username: %s, Password: %s ! \n", client->client, client->ip, current.username, current.password);
             strncpy(current.ipaddr, client->ip, 16);
+            current.ipaddr[strlen(current.ipaddr)] = '\0';
             close(client->client);
             free(client);
             return NULL;
@@ -98,6 +101,10 @@ void *ListenToClient(void *arg){
     socklen_t client_len = sizeof(client_addr);
     int newsocket = accept(socketfd, (struct sockaddr *) &client_addr, &client_len);
     infoclient *client  = malloc(sizeof(infoclient));
+    if (client == NULL) {
+      printf("Error in malloc\n");
+      return 0;
+    }
     client->client = newsocket; 
     inet_ntop(AF_INET, &client_addr.sin_addr, client->ip , sizeof(client->ip));
     pthread_t newthread;
