@@ -20,7 +20,10 @@ services:
     build: ./server
     ports:
       - "6000:6000"
+    volumes:
+      - ./db:/server/db
     command: ["tail", "-f", "/dev/null"]
+    # command: /server/server
     networks:
       mynetwork: 
         ipv4_address: 172.21.0.12
