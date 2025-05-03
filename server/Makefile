@@ -2,7 +2,7 @@
 CC= gcc
 
 ## Options de compilation
-CO= -Wall -Wextra -lssl
+CO= -Wall -Wextra -lssl -lcrypto -lpthread
 
 ## Source
 SRC = server.c server.h

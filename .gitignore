@@ -4,3 +4,4 @@ tables/*
 src/todo.txt
 server/serv
 readme
+server/commands
