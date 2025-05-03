@@ -11,16 +11,25 @@
 #include <time.h>
 #include <arpa/inet.h>
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #define API_COMMAND "command"
 
-extern int socketfd;
 extern struct sockaddr_in addr;
 extern struct sockaddr_in client_addr;
 
 
+typedef struct context {
+  int fd;
+  SSL_CTX *ctx;
+  
+} context;
+
 typedef struct infoclient {
   int client;
   char ip[16];
+  SSL *ssl;
 } infoclient;
 
 typedef struct malwareRetrieve{
