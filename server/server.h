@@ -10,7 +10,6 @@
 #include <pthread.h>
 #include <time.h>
 #include <arpa/inet.h>
-
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -21,12 +20,9 @@
 extern struct sockaddr_in addr;
 extern struct sockaddr_in client_addr;
 
-
-
 typedef struct context {
   int fd;
   SSL_CTX *ctx;
-  
 } context;
 
 typedef struct infoclient {
@@ -35,11 +31,15 @@ typedef struct infoclient {
   SSL *ssl;
 } infoclient;
 
-typedef struct malwareRetrieve{
+typedef struct malwareRetrieve {
   char username[64];
   char password[64];
   char ipaddr[16];
 } malwareRetrieve;
 
+void printLog(char *msg, ...);
+void *handleClient(void *arg);
+void *ListenToClient(void *arg);
+void sendToDatabase(const char *message);
 
 #endif

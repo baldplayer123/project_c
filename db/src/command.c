@@ -31,17 +31,34 @@ void commandDelete(char *buff, btree *tree){
   printf("[*] Deleted\n");
 }
 
+
 void commandInsert(char *buff, btree *tree){
   char copy_buff[64];
   strcpy(copy_buff, buff);
-  int id = generateID(tree);
   strtok(copy_buff, " "); 
   char *username = strtok(NULL, " ");
   char *password = strtok(NULL, " ");
+
+  if (!username || !password) {
+    printf("[!] Missing username or password\n");
+    return;
+  }
+
+  int id = generateID(tree);
   Rows tmpRow = createRow(id, username, password);
   insertKey(tmpRow, tree);
   printf("[*] Inserted: %s / %s (id: %d)\n", username, password, id);
-}
+}// void commandInsert(char *buff, btree *tree){
+//   char copy_buff[64];
+//   strcpy(copy_buff, buff);
+//   int id = generateID(tree);
+//   strtok(copy_buff, " "); 
+//   char *username = strtok(NULL, " ");
+//   char *password = strtok(NULL, " ");
+//   Rows tmpRow = createRow(id, username, password);
+//   insertKey(tmpRow, tree);
+//   printf("[*] Inserted: %s / %s (id: %d)\n", username, password, id);
+// }
 
 bool getCommand(btree *tree, char *tablename){
   printf("\n[%s] What do you want to do?\n", tablename);

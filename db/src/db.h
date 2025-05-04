@@ -35,6 +35,8 @@ typedef struct btree{
 
 extern btree *active_tree;
 extern char active_tablename[64];
+
+
   // Main utils
   // ---------------------
 
@@ -49,6 +51,12 @@ void commandSelect(char *buff, btree *tree);
 void commandListall(btree *tree);
 int findMaxID(btree_node *node);
 int generateID(btree *tree);
+
+  // Server
+  // ---------------------
+
+void startServer(); 
+void stopServer();
 
   // Save and load backups
   // ---------------------

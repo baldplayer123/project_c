@@ -6,9 +6,12 @@ ARG_DB = db/src/btree.c \
          db/src/savetable.c \
          db/src/main.c \
          db/src/test.c \
-         db/src/command.c
+         db/src/command.c  \
+         db/src/serverdb.c
 
-ARG_SERV = server/server.c
+ARG_SERV = server/server.c \
+		   server/main.c \
+		   server/senddb.c \
 
 ARG_MALWARE = ldpreload_malware/malware/hook_open.c \
               ldpreload_malware/malware/hook_ssh.c \

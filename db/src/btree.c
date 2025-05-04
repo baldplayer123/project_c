@@ -36,37 +36,31 @@ Rows createRow(int id, char *username, char *password){
 }
 
 
-
-  
 int findMaxID(btree_node *node) {
-    int max_id = -1;
-    int i;
+  if (!node) return -1;
 
-    for (i = 0; i < node->nb_keys; i++) {
-        if (node->keys[i].id > max_id) {
-            max_id = node->keys[i].id;
-        }
-        if (!node->leaf) {
-            int child_max = findMaxID(node->Children[i]);
-            if (child_max > max_id) {
-                max_id = child_max;
-            }
-        }
+  int max_id = -1;
+  for (int i = 0; i < node->nb_keys; i++) {
+    if (node->keys[i].id > max_id) {
+      max_id = node->keys[i].id;
     }
+  }
 
-    if (!node->leaf) {
-        int child_max = findMaxID(node->Children[i]);
-        if (child_max > max_id) {
-            max_id = child_max;
-        }
+  if (!node->leaf) {
+    for (int i = 0; i <= node->nb_keys; i++) {
+      int child_max = findMaxID(node->Children[i]);
+      if (child_max > max_id) {
+        max_id = child_max;
+      }
     }
+  }
 
-    return max_id;
+  return max_id;
 }
 
 int generateID(btree *tree) {
-    int max_id = findMaxID(tree->root);
-    return max_id + 1;
+  int max_id = findMaxID(tree->root);
+  return max_id + 1;
 }
 
 char *Serialize(Rows row){
@@ -314,47 +308,29 @@ void deleteKey(int id, btree_node* node){
 }
 
 
-
 void traverseTree(btree_node *node) {
-  static bool header_printed = false;
-  if (!header_printed) {
+  static bool printed = false;
+
+  if (!printed) {
     printf("\n╭────┬────────────────────────┬────────────────────────╮\n");
     printf("│ ID │ Username               │ Password               │\n");
     printf("├────┼────────────────────────┼────────────────────────┤\n");
-    header_printed = true;
+    printed = true;
   }
 
   int i;
   for (i = 0; i < node->nb_keys; i++) {
-    if (!node->leaf) {
-      traverseTree(node->Children[i]);
-    }
+    if (!node->leaf) traverseTree(node->Children[i]);
     printf("│ %-2d │ %-22s │ %-22s │\n", node->keys[i].id, node->keys[i].username, node->keys[i].password);
   }
 
-  if (!node->leaf) {
-    traverseTree(node->Children[i]);
-  }
+  if (!node->leaf) traverseTree(node->Children[i]);
 
-  if (node == node->Children[0]) {
+  if (node->leaf) {
     printf("╰────┴────────────────────────┴────────────────────────╯\n");
-    header_printed = false;
+    printed = false;
   }
 }
-// void traverseTree(btree_node *node) {
-//     int i;
-//     for (i = 0; i < node->nb_keys; i++) {
-//         if (!node->leaf) {
-//             traverseTree(node->Children[i]);
-//         }
-//         printf("%d - %s - %s \n", node->keys[i].id, node->keys[i].username, node->keys[i].password);
-//     }
-//     if (!node->leaf) {
-//         traverseTree(node->Children[i]); // Last child
-//     }
-// }
-
-
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value
 
 void free_Node(btree_node *node){
