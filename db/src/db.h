@@ -7,14 +7,6 @@
 #define MAX_KEY (ORDER_TREE - 1)
 #define MIN_KEY ((ORDER_TREE /2) - 1)
 
-// Create serialisation for csv
-// write and load btree on file
-// Create counter of keys inside the btree
-
-
-// #define createRow(...) createRow(__VA_ARGS__, yanis, pass, NULL)
-
-
 
 
   // Btree
@@ -39,6 +31,10 @@ typedef struct btree{
   struct btree_node *root;
 } btree;
 
+ 
+
+extern btree *active_tree;
+extern char active_tablename[64];
   // Main utils
   // ---------------------
 

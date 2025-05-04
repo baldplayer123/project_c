@@ -17,10 +17,10 @@ void  btree_test_Insert100values(){
   saveTable(tree->root, "testtable");
   free_Tree(tree);
   if (ret == 1) {
-    printf("End - Test passed without issues\n");
+    printf("[OK] Test passed\n");
   }
   else {
-    printf("End - Test failed!\n");
+    printf("[FAIL] Test failed\n");
     exit(1);
   }
   
@@ -47,11 +47,11 @@ void btree_test_InsertAndDelete(){
   if (ret == 1) {
 
     traverseTree(tree->root);
-    printf("End - Test passed without issues\n");
+    printf("[OK] Test passed\n");
   }
   else {
     traverseTree(tree->root);
-    printf("End - Test failed!\n");
+    printf("[FAIL] Test failed\n");
     exit(1);
   }
   
@@ -118,12 +118,12 @@ int btree_test_traversalreturn(btree_node* node, int* lastValue) {
 }
 
 void run_all_tests(){
-  printf("Starting tests!\n");
+  printf("\n[*] Running internal tests...\n\n");
 
-  printf("Start - Insertion of 100 values in btree!\n");
+  printf("[*] Test: Insert 100 values in btree\n");
   btree_test_Insert100values();
   
-  printf("Start - Insert 100 + Deletion of some values in btree!\n");
-  btree_test_Insert100values();
-}
+  // printf("[*] Test: Insert 100 values and delete some keys\n");
+  // btree_test_InsertAndDelete();
 
+}

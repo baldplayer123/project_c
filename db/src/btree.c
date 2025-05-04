@@ -75,13 +75,21 @@ char *Serialize(Rows row){
   return csvRow;
 }
 
+
 Rows Unserialize(char *line){
-  int id = atoi(strtok(line,","));
+  char *copy = strdup(line);
+  char *id_str = strtok(copy, ",");
   char *username = strtok(NULL, ",");
   char *password = strtok(NULL, ",");
-  Rows tmpRow = createRow(id, username, password);
 
-  return tmpRow;
+  if (!id_str || !username || !password) {
+    printf("[ERROR] Malformed row: %s\n", line);
+    exit(1);
+  }
+
+  Rows row = createRow(atoi(id_str), username, password);
+  free(copy);
+  return row;
 }
 
 void SearchKey(btree_node *node, int id){
@@ -308,17 +316,43 @@ void deleteKey(int id, btree_node* node){
 
 
 void traverseTree(btree_node *node) {
-    int i;
-    for (i = 0; i < node->nb_keys; i++) {
-        if (!node->leaf) {
-            traverseTree(node->Children[i]);
-        }
-        printf("%d - %s - %s \n", node->keys[i].id, node->keys[i].username, node->keys[i].password);
-    }
+  static bool header_printed = false;
+  if (!header_printed) {
+    printf("\n╭────┬────────────────────────┬────────────────────────╮\n");
+    printf("│ ID │ Username               │ Password               │\n");
+    printf("├────┼────────────────────────┼────────────────────────┤\n");
+    header_printed = true;
+  }
+
+  int i;
+  for (i = 0; i < node->nb_keys; i++) {
     if (!node->leaf) {
-        traverseTree(node->Children[i]); // Last child
+      traverseTree(node->Children[i]);
     }
+    printf("│ %-2d │ %-22s │ %-22s │\n", node->keys[i].id, node->keys[i].username, node->keys[i].password);
+  }
+
+  if (!node->leaf) {
+    traverseTree(node->Children[i]);
+  }
+
+  if (node == node->Children[0]) {
+    printf("╰────┴────────────────────────┴────────────────────────╯\n");
+    header_printed = false;
+  }
 }
+// void traverseTree(btree_node *node) {
+//     int i;
+//     for (i = 0; i < node->nb_keys; i++) {
+//         if (!node->leaf) {
+//             traverseTree(node->Children[i]);
+//         }
+//         printf("%d - %s - %s \n", node->keys[i].id, node->keys[i].username, node->keys[i].password);
+//     }
+//     if (!node->leaf) {
+//         traverseTree(node->Children[i]); // Last child
+//     }
+// }
 
 
   // Inside NewNode is memory address on the heap, and Inside *NewNode is the actual struct so returning it means copying the value

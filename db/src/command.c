@@ -5,7 +5,6 @@
 #include <sys/select.h>
 #include "db.h"
 
-
 void commandListall(btree *tree){
   traverseTree(tree->root);
 }
@@ -18,8 +17,6 @@ void commandSelect(char *buff, btree *tree){
   id[strcspn(id, "\n")] = 0;
   int int_id = atoi(id);
   SearchKey(tree->root, int_id);
-  return;
-
 }
 
 void commandDelete(char *buff, btree *tree){
@@ -29,31 +26,33 @@ void commandDelete(char *buff, btree *tree){
   char *id = strtok(NULL, " ");
   id[strcspn(id, "\n")] = 0;
   int int_id = atoi(id);
-  printf("NUMBER IS %d\n", int_id);
+  printf("[*] Deleting id: %d\n", int_id);
   deleteKey(int_id, tree->root);
-  printf("Value deleted successfully\n");
-  return;
+  printf("[*] Deleted\n");
 }
 
 void commandInsert(char *buff, btree *tree){
   char copy_buff[64];
   strcpy(copy_buff, buff);
-  // printf("%s\n", buff);
   int id = generateID(tree);
   strtok(copy_buff, " "); 
   char *username = strtok(NULL, " ");
   char *password = strtok(NULL, " ");
   Rows tmpRow = createRow(id, username, password);
   insertKey(tmpRow, tree);
-  printf("Value inserted successfully\n");
-  return;
+  printf("[*] Inserted: %s / %s (id: %d)\n", username, password, id);
 }
 
 bool getCommand(btree *tree, char *tablename){
-  printf("\n%s> what do you want to do ?\n%s> Available command: insert, select, listall, delete, exit\n", tablename, tablename);
+  printf("\n[%s] What do you want to do?\n", tablename);
+  printf("[%s] Commands: insert, select, listall, delete, exit\n", tablename);
   char buff[100];
-  printf(" %s> ", tablename);
-  fgets(buff, 100, stdin);
+  printf("[%s] > ", tablename);
+  if (!fgets(buff, sizeof(buff), stdin)) {
+    printf("[!] Input error\n");
+    return 1;
+  }
+
   if (!strncmp(buff, "insert", 6)) {
     commandInsert(buff, tree);
   }
@@ -70,12 +69,10 @@ bool getCommand(btree *tree, char *tablename){
     return 1;
   }
   else {
-    printf("Invalid command\n");
+    printf("[!] Unknown command\n");
   }
   return 0;
 }
-
-
 
 void useTable(btree *tree, char *tablename){
   while (true) {
@@ -84,6 +81,4 @@ void useTable(btree *tree, char *tablename){
       break;
     }
   }
-  return;  
-  
 }
