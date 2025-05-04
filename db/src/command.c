@@ -5,10 +5,18 @@
 #include <sys/select.h>
 #include "db.h"
 
+
+// COMMAND: LISTALL
+// -----------------
+// Display all rows stored in the B-Tree
 void commandListall(btree *tree){
   traverseTree(tree->root);
 }
 
+
+// COMMAND: SELECT
+// -----------------
+// Search and display a row by ID from input buffer
 void commandSelect(char *buff, btree *tree){
   char copy_buff[64];
   strcpy(copy_buff, buff);
@@ -19,6 +27,10 @@ void commandSelect(char *buff, btree *tree){
   SearchKey(tree->root, int_id);
 }
 
+
+// COMMAND: DELETE
+// -----------------
+// Delete a row by ID parsed from the buffer
 void commandDelete(char *buff, btree *tree){
   char copy_buff[64];
   strcpy(copy_buff, buff);
@@ -32,6 +44,9 @@ void commandDelete(char *buff, btree *tree){
 }
 
 
+// COMMAND: INSERT
+// -----------------
+// Insert a new row with username and password parsed from input
 void commandInsert(char *buff, btree *tree){
   char copy_buff[64];
   strcpy(copy_buff, buff);
@@ -48,18 +63,12 @@ void commandInsert(char *buff, btree *tree){
   Rows tmpRow = createRow(id, username, password);
   insertKey(tmpRow, tree);
   printf("[*] Inserted: %s / %s (id: %d)\n", username, password, id);
-}// void commandInsert(char *buff, btree *tree){
-//   char copy_buff[64];
-//   strcpy(copy_buff, buff);
-//   int id = generateID(tree);
-//   strtok(copy_buff, " "); 
-//   char *username = strtok(NULL, " ");
-//   char *password = strtok(NULL, " ");
-//   Rows tmpRow = createRow(id, username, password);
-//   insertKey(tmpRow, tree);
-//   printf("[*] Inserted: %s / %s (id: %d)\n", username, password, id);
-// }
+}
 
+
+// COMMAND HANDLER
+// -----------------
+// Read and execute user command for a given table
 bool getCommand(btree *tree, char *tablename){
   printf("\n[%s] What do you want to do?\n", tablename);
   printf("[%s] Commands: insert, select, listall, delete, exit\n", tablename);
@@ -91,6 +100,10 @@ bool getCommand(btree *tree, char *tablename){
   return 0;
 }
 
+
+// TABLE USAGE LOOP
+// -----------------
+// Interactive loop to handle commands for the active table
 void useTable(btree *tree, char *tablename){
   while (true) {
     int ret = getCommand(tree, tablename);

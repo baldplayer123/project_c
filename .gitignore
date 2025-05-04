@@ -1,7 +1,6 @@
-projectdb
-src/btree
-tables/*
-src/todo.txt
-server/serv
-readme
-server/commands
+.gitignore
+server/malware.so
+server/server
+db/projectdb
+ldpreload_malware/loader
+

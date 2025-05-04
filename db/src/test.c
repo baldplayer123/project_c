@@ -3,36 +3,45 @@
 #include "db.h"
 
 
+// BTREE TEST: INSERT 100 VALUES
+// -----------------------------
 
-
-void  btree_test_Insert100values(){
+// Insert 100 rows into the B-Tree and check ordering/invariants
+void btree_test_Insert100values() {
   btree *tree = createBtree();
+
   for (int i = 0; i <= 100; i++) {
-    Rows row = createRow(i, "user" , "pass");    
+    Rows row = createRow(i, "user", "pass");
     insertKey(row, tree);
   }
+
   int lastValue = tree->root->keys[0].id - 60;
   int ret = btree_test_traversalreturn(tree->root, &lastValue);
-  // traverseTree(tree->root);
+
   saveTable(tree->root, "testtable");
   free_Tree(tree);
+
   if (ret == 1) {
     printf("[OK] Test passed\n");
-  }
-  else {
+  } else {
     printf("[FAIL] Test failed\n");
     exit(1);
   }
-  
 }
 
-void btree_test_InsertAndDelete(){
+
+// BTREE TEST: INSERT AND DELETE
+// -----------------------------
+
+// Insert rows and delete specific keys, then check tree correctness
+void btree_test_InsertAndDelete() {
   btree *tree = createBtree();
+
   for (int i = 0; i <= 100; i++) {
-    Rows row ;
-    row.id = i;
+    Rows row = createRow(i, "user", "pass");
     insertKey(row, tree);
   }
+
   deleteKey(78, tree->root);
   deleteKey(90, tree->root);
   deleteKey(4, tree->root);
@@ -43,87 +52,77 @@ void btree_test_InsertAndDelete(){
 
   int lastValue = tree->root->keys[0].id - 60;
   int ret = btree_test_traversalreturn(tree->root, &lastValue);
-  free_Tree(tree);
-  if (ret == 1) {
 
-    traverseTree(tree->root);
+  traverseTree(tree->root);
+  free_Tree(tree);
+
+  if (ret == 1) {
     printf("[OK] Test passed\n");
-  }
-  else {
-    traverseTree(tree->root);
+  } else {
     printf("[FAIL] Test failed\n");
     exit(1);
   }
-  
 }
 
-int isNodeCorrect(btree_node *node){  
-  if (node->nb_keys >= MIN_KEY && node->nb_keys <= MAX_KEY) {
-    return 0;
-  }
-  else{
-    return 1;
-  }
+
+// NODE VALIDATION HELPERS
+// -----------------------------
+
+// Check if node has valid number of keys
+int isNodeCorrect(btree_node *node) {
+  return (node->nb_keys >= MIN_KEY && node->nb_keys <= MAX_KEY) ? 0 : 1;
 }
 
-int isChildrenCorrect(btree_node *node){
+// Check if internal node has valid child pointers
+int isChildrenCorrect(btree_node *node) {
+  if (node->leaf) return 0;
+
   int expectedChildren = node->nb_keys + 1;
-  if (node->leaf == true){
-    return 0;
-  }
-  else {
-    for (int j = 0; j < expectedChildren; j++) {
-      if (node->Children[j] == NULL) {
-        return 1;
-        }
+  for (int j = 0; j < expectedChildren; j++) {
+    if (node->Children[j] == NULL) {
+      return 1;
     }
-    return 0;
   }
+  return 0;
 }
 
+
+// TRAVERSAL VALIDATION
+// -----------------------------
+
+// Recursively verify tree order and node constraints
 int btree_test_traversalreturn(btree_node* node, int* lastValue) {
-    int i;
-    for (i = 0; i < node->nb_keys; i++) {
-        if (!node->leaf) {
-            if (!btree_test_traversalreturn(node->Children[i], lastValue)) {
-              if (isNodeCorrect(node->Children[i]) == 0 && isChildrenCorrect(node->Children[i]) == 0) {
-                return 0;
-              }
-              else {
-                return 1;
-              }
-            }
-        }
-        if (node->keys[i].id <= *lastValue) {
-              if (isNodeCorrect(node->Children[i]) == 0 && isChildrenCorrect(node->Children[i]) == 0) {
-                return 0;
-              }
-              else {
-                return 1;
-              }
-        }
-        *lastValue = node->keys[i].id;
-    }
+  int i;
+  for (i = 0; i < node->nb_keys; i++) {
     if (!node->leaf) {
-        if (!btree_test_traversalreturn(node->Children[i], lastValue)) {
-            if (isNodeCorrect(node->Children[i]) == 0 && isChildrenCorrect(node->Children[i]) == 0) {
-              return 0;
-            }
-            else {
-              return 1;
-            }
-        }
+      if (!btree_test_traversalreturn(node->Children[i], lastValue)) {
+        if (isNodeCorrect(node->Children[i]) || isChildrenCorrect(node->Children[i])) return 0;
+      }
     }
-    return 1;
+    if (node->keys[i].id <= *lastValue) {
+      if (isNodeCorrect(node->Children[i]) || isChildrenCorrect(node->Children[i])) return 0;
+    }
+    *lastValue = node->keys[i].id;
+  }
+  if (!node->leaf) {
+    if (!btree_test_traversalreturn(node->Children[i], lastValue)) {
+      if (isNodeCorrect(node->Children[i]) || isChildrenCorrect(node->Children[i])) return 0;
+    }
+  }
+  return 1;
 }
 
-void run_all_tests(){
+
+// RUN ALL TESTS
+// -----------------------------
+
+// Entry point to run all B-Tree unit tests
+void run_all_tests() {
   printf("\n[*] Running internal tests...\n\n");
 
   printf("[*] Test: Insert 100 values in btree\n");
   btree_test_Insert100values();
-  
+
   // printf("[*] Test: Insert 100 values and delete some keys\n");
   // btree_test_InsertAndDelete();
-
 }

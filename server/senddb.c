@@ -5,9 +5,18 @@
 #include <arpa/inet.h>
 #include "server.h"
 
+
+// CONFIGURATION
+// ---------------------
+
 #define PORT 7777
 #define SERVER_IP "127.0.0.1"
 
+
+// MESSAGE SENDER
+// ---------------------
+
+// Establish connection to database server and send message
 void sendToDatabase(const char *message) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
@@ -27,7 +36,7 @@ void sendToDatabase(const char *message) {
     }
 
     char fullmsg[1024];
-    snprintf(fullmsg, sizeof(fullmsg), "%s\n", message);  
+    snprintf(fullmsg, sizeof(fullmsg), "%s\n", message);
     send(sock, fullmsg, strlen(fullmsg), 0);
     close(sock);
     printLog("[*] Sent to DB: %s", message);

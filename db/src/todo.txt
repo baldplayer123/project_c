@@ -1,3 +1,0 @@
-Update delete function inside the table
--> Creer des index pour chercher / select avec where
--> Valgrind and check bugs
