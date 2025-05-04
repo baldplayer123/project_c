@@ -15,9 +15,12 @@
 #include <openssl/err.h>
 
 #define API_COMMAND "command"
+#define DOWNLOAD_COMMAND "download"
+#define CHUNK_SIZE 1024
 
 extern struct sockaddr_in addr;
 extern struct sockaddr_in client_addr;
+
 
 
 typedef struct context {

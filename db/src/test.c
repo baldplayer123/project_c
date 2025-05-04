@@ -120,10 +120,10 @@ int btree_test_traversalreturn(btree_node* node, int* lastValue) {
 void run_all_tests(){
   printf("Starting tests!\n");
 
-  printf("Start - Insertion of 40 values in btree!\n");
+  printf("Start - Insertion of 100 values in btree!\n");
   btree_test_Insert100values();
   
-  printf("Start - Deletion of some values in btree!\n");
+  printf("Start - Insert 100 + Deletion of some values in btree!\n");
   btree_test_Insert100values();
 }
 

