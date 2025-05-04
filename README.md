@@ -69,14 +69,14 @@ Il se compose de **trois conteneurs** :
 
 ###  Architecture simplifiée
 
-```text
+```
 +------------------+          +---------------------+          +-------------------+
 |                  |          |                     |          |                   |
 |   sshvictims     |  <─────  |   victimsdebian     |  ─────>  |     c2server      |
 |  (Serveur SSH)   |          |   (Malware actif)   |          | (SSL + DB + .so)  |
 |                  |          |                     |          |                   |
 +------------------+          +---------------------+          +-------------------+
-
+```
 
 - Ce projet est fourni à des fins purement pédagogiques afin de comprendre :
   - L’utilisation de `LD_PRELOAD` pour le hooking de fonctions système
